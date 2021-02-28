@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,width=device-width,user-scalable=no" />
+    <meta name="keywords" content="Arma 3, Arma, ARES, Arma 3 artillery, Online artillery calculator, Artillery calculator, Arma 3 online artillery calculator, KOTH, King of the Hill" />
+    <meta name="description" content="ARES - The innovative Arma 3 Online Artillery Calculator" />
+    <meta ame="author" content="BE3dART - Gianluca I." />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="css/styles.css">
+
+</head>
+
+<body>
+
+    <div class="span9">
+        <div id="map-wrapper">
+            <div id="map"></div>
+
+
+            <div style="position: absolute; right: 0%; top: 20%; z-index: 1999; width: 10%; height: 30%; margin: 2vh; background-color: #e50027; color: white; border-radius: 0.4vh;">
+
+                <div class="row">
+                    <div class="column">Number of Markers:</div>
+                    <div class="column" id="numMarker">0</div>
+                </div>
+
+                <div class="row">
+                    <div class="column">Height Difference:</div>
+                    <div class="column" id="heightDifference">0m</div>
+                </div>
+
+                <div class="row">
+                    <div class="column">Distance:</div>
+                    <div class="column" id="distance">0m</div>
+                </div>
+
+                <div class="row">
+                    <div class="column">Estimated Time (@40km/h):</div>
+                    <div class="column" id="time">0min</div>W 
+                </div>
+
+            </div>
+            
+            <div style="position: absolute; left: 0%; z-index: 2000; width: 95%; top: 0; margin: 2vh">
+
+                <button class="buttons" id="Btn5" onclick="location.href='https://github.com/BE3dARt/ARES'"><i class="fa fa-code" ></i>This is heavy WIP and can't be used atm! Follow the Developement here!</button>
+
+            </div>
+
+            <div style="position: absolute; right: 0%; z-index: 2000; width: 10%; bottom: 0; margin: 2vh">
+
+
+                <button class="buttons" id="Btn5"><i class="fa fa-code"></i> About</button>
+                <button class="buttons" id="Btn4"><i class="fa fa-cubes"></i> Report Bug</button>
+                <button class="buttons" id="Btn4" onclick="location.href='https://www.paypal.com/donate/?token=XMmSe4OvVD3aoU06JfrH9anESh6h8jmvSnE1J4slx-xNLAtlwSz7vmfqSKw_I0ktcBCwFW&country.x=CH&locale.x=CH&Z3JncnB0='" type="button"><i class="fa fa-paypal"></i> Donate</button>
+
+            </div>
+
+
+        </div>
+
+
+
+    </div>
+
+    <script type="text/javascript" src="js/scripts_test.js"></script>
+
+</body>
+
+</html>

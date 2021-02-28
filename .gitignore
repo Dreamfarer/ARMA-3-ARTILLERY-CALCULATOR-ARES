@@ -10,6 +10,8 @@
 *.userosscache
 *.sln.docstates
 *.B3D
+*.jpg
+*.png
 
 Deployment/opencv_world430.dll
 Deployment/opencv_world430d.dll
