@@ -177,7 +177,7 @@
 
         });
 
-        markerArray[counter].on('drag', function (e) {
+        markerArray[counter].on('dragend', function (e) {
             var tempPos = this.getLatLng();
 
             positionArray[0][counter] = tempPos.lat;

@@ -2,6 +2,8 @@
 //magick convert -crop 256x256 ContourMap.jpg tilesLevel0/tile%01d.jpg
 //Dir | Rename-Item -NewName {$_.name -replace "-" , ""}
 
+var shootingBoundaries;
+
 var markerIcon = L.icon({
     iconUrl: 'img/pin.png',
     iconSize: [50, 50],
@@ -81,12 +83,12 @@ class Marking {
 
     //Get the azimut right
     calculateDirection(distanceComponents) {
-        
+
         console.log("x: %s, y: %s", distanceComponents[0], distanceComponents[1]);
 
         //0° to 90°, x: positive, y: positive
         if (distanceComponents[0] >= 0 && distanceComponents[1] >= 0) {
-            this.direction = (Math.abs(Math.atan2(distanceComponents[1], distanceComponents[0])) * 180.0 / Math.PI);
+            this.direction = 90 - (Math.abs(Math.atan2(distanceComponents[1], distanceComponents[0])) * 180.0 / Math.PI);
         }
 
         //90° to 180°, x: positive, y: negative
@@ -103,7 +105,7 @@ class Marking {
         if (distanceComponents[0] < 0 && distanceComponents[1] >= 0) {
             this.direction = 450 - (Math.abs(Math.atan2(distanceComponents[1], distanceComponents[0])) * 180.0 / Math.PI);
         }
-        
+
         console.log("Direction: %s", this.direction);
     }
 
@@ -129,7 +131,7 @@ class Marking {
             this.firemode = "Further";
             this.velocity = 648; //0.48
         }
-
+        
         if (this.velocity == 0) {
             alert("Too Close - Shooting is not possible");
             return false;
@@ -150,7 +152,7 @@ class Marking {
 
         //Pythagorean theorem
         this.distance = Math.sqrt(Math.pow(Math.abs(x), 2) + Math.pow(Math.abs(y), 2));
-        
+
         console.log("Distance: %s", this.distance);
 
         //Calculate height difference between artillery unit and target
@@ -167,6 +169,10 @@ class Marking {
         this.gunElevation[0] = (Math.atan((Math.pow(this.velocity, 2) - Math.sqrt(Math.pow(this.velocity, 4) - (gravity * ((gravity * Math.pow(this.distance, 2)) + (2 * this.heightDifference * Math.pow(this.velocity, 2)))))) / (gravity * this.distance))) * 180 / Math.PI;
 
         this.gunElevation[1] = (Math.atan((Math.pow(this.velocity, 2) + Math.sqrt(Math.pow(this.velocity, 4) - (gravity * ((gravity * Math.pow(this.distance, 2)) + (2 * this.heightDifference * Math.pow(this.velocity, 2)))))) / (gravity * this.distance))) * 180 / Math.PI;
+        
+        //To reset the boundary tracker
+        this.velocity = 0;
+
     }
 }
 var target = [new Marking([15000, 15000, 50])];
@@ -182,47 +188,88 @@ function addMarker(point, type, elevation, direction, firemode) {
     while (markerArray[counter] != null && markerArray[counter] != 0) {
         counter += 1;
     }
-    
+
     markerArray[counter] = L.marker([point[1], point[0]], {
         icon: type,
         draggable: 'true'
     }).addTo(map);
-    
+
+    //If marker has been draged, request new data for it
+    markerArray[counter].on('dragend', function (e) {
+        var tempPos = this.getLatLng();
+        var point = projectCoordinates([tempPos.lng, tempPos.lat]);
+        requestHeight(point[0], point[1], "update", [tempPos.lng, tempPos.lat], counter);
+    });
+
     markerArray[counter].bindPopup("Elevation: " + Math.ceil(elevation[0] / 0.01) * 0.01 + "° or " + Math.ceil(elevation[1] / 0.01) * 0.01 + "°<br>Direction: " + Math.ceil(direction / 0.01) * 0.01 + "°<br>Firemode: " + firemode).openPopup();
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Height Data Callback
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-function heightdataCallback(game, mapp, message, mode) {
+function heightdataCallback(game, mapp, message, mode, markerCounter) {
 
     var arrayCount = (target.length);
     console.log("Array is currently %s long", arrayCount);
 
-    if (arrayCount == 1 && artilleryPosition[0] == 1) {
+    if (mode == "update" && markerCounter > 0) {
+        target[markerCounter].position[0] = game[0];
+        target[markerCounter].position[1] = game[1];
+        target[markerCounter].position[2] = (message + 1.7);
 
-        artilleryPosition = [game[0], game[1] , (message+1.7)];
-    
-        addMarker(mapp, markerIconDrop, [0,0], 0, "None");
+        target[markerCounter].calculateTrajectoryProjectileMotion(artilleryPosition);
 
-    } else if (mode == "create") {
+        markerArray[markerCounter].setPopupContent("Elevation: " + Math.ceil(target[markerCounter].gunElevation[0] / 0.01) * 0.01 + "° or " + Math.ceil(target[markerCounter].gunElevation[1] / 0.01) * 0.01 + "°<br>Direction: " + Math.ceil(target[markerCounter].direction / 0.01) * 0.01 + "°<br>Firemode: " + target[markerCounter].firemode);
 
-        target.push(new Marking([game[0], game[1], message]));
-        arrayCount = (target.length) - 1;
-        target[arrayCount].calculateTrajectoryProjectileMotion(artilleryPosition);
-        console.log("Gun Elevation: %s", target[arrayCount].gunElevation[1]);
-
-        addMarker(mapp, markerIcon, [target[arrayCount].gunElevation[0],target[arrayCount].gunElevation[1]], target[arrayCount].direction, target[arrayCount].firemode);
+        markerArray[markerCounter].openPopup();
     }
 
-    map.closePopup();
+    if (mode == "update" && markerCounter == 0) {
+
+        //Set poition for artillery unit
+        artilleryPosition = [game[0], game[1], (message + 1.7)];
+
+        markerArray[markerCounter].setPopupContent("Artillery Unit at " + artilleryPosition[2] + "m");
+        map.removeLayer(shootingBoundaries);
+        shootingBoundaries = L.circle([mapp[1], mapp[0]], {radius: 495}).addTo(map);
+    }
+
+    //Set position for artillery (The first time you click on the map)
+    if (arrayCount == 1 && artilleryPosition[0] == 1) {
+
+        //Set poition for artillery unit
+        artilleryPosition = [game[0], game[1], (message + 1.7)];
+
+        //Add the marker for the artillery unit
+        addMarker(mapp, markerIconDrop, [0, 0], 0, "None");
+        
+        shootingBoundaries = L.circle([mapp[1], mapp[0]], {radius: 495}).addTo(map);
+
+        //Create new targets
+    } else if (mode == "create") {
+
+        //Add marker to the array
+        target.push(new Marking([game[0], game[1], message]));
+        arrayCount = (target.length) - 1;
+
+        //Calculate all associate data
+        target[arrayCount].calculateTrajectoryProjectileMotion(artilleryPosition);
+
+        //Add the marker for the target
+        addMarker(mapp, markerIcon, [target[arrayCount].gunElevation[0], target[arrayCount].gunElevation[1]], target[arrayCount].direction, target[arrayCount].firemode);
+    }
+
+
+
+    //map.closePopup();
 
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Send PHP request to retrieve height data
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-function requestHeight(x, y, mode, realPosition) {
+function requestHeight(x, y, mode, realPosition, markerCounter) {
 
     //Create new HTTP Request
     var createCORSRequest = function (method, url) {
@@ -254,7 +301,7 @@ function requestHeight(x, y, mode, realPosition) {
 
             //Finished
             receivedMessage = parseFloat(xhr.responseText)
-            heightdataCallback([x,y], realPosition, receivedMessage, mode);
+            heightdataCallback([x, y], realPosition, receivedMessage, mode, markerCounter);
             return; // this will alert "true";
         }
     }
@@ -273,10 +320,6 @@ function requestHeight(x, y, mode, realPosition) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Add Marker with Elevation and Polyline
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Add Marker with Elevation and Polyline
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function onMapClick(e) {
 
     //Add a popup where the user can choose between some buttons
@@ -289,7 +332,7 @@ function onMapClick(e) {
     addButton.addEventListener('click', function () {
 
         //Request height data at that point
-        requestHeight(point[0], point[1], "create", [e.latlng.lng, e.latlng.lat]);
+        requestHeight(point[0], point[1], "create", [e.latlng.lng, e.latlng.lat], -1);
 
     });
 
