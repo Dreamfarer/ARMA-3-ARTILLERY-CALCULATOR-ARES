@@ -37,7 +37,6 @@ L.CRS.pr = L.extend({}, L.CRS.Simple, {
     infinite: true
 });
 
-
 var shootingBoundaries;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,19 +64,11 @@ L.tileLayer('map/{z}/map_{x}_{y}.jpg', {
 //Set view to a default position
 map.setView([13995, 14723], 14);
 
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Project Map coordinates to game coordinates
+//Project map-coordinates to game-coordinates
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function projectCoordinates(point) {
-
-    var x = point[0];
-    var y = 30720 - point[1];
-
-    x = Math.ceil(x / 5) * 5;
-    y = Math.ceil(y / 5) * 5;
-
-    return [x, y];
+    return [(Math.ceil(point[0] / 5) * 5), (Math.ceil((30720 - point[1]) / 5) * 5)];
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -217,7 +208,6 @@ function popupContent(elevation, direction, firemode, mode) {
 //Create new Marker
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var markerArray = [0];
-
 function addMarker(point, type, elevation, direction, firemode) {
 
     //Decide which icon to use
@@ -276,9 +266,7 @@ function heightdataCallback(game, mapp, message, mode, markerCounter) {
 
     if (mode == "update" && markerCounter > 0) {
         //Update it's positions
-        target[markerCounter].position[0] = game[0];
-        target[markerCounter].position[1] = game[1];
-        target[markerCounter].position[2] = (message + 1.7);
+        target[markerCounter].position = [game[0], game[1], (message + 1.7)];
 
         //Calculate other variables
         target[markerCounter].calculateTrajectoryProjectileMotion(artilleryPosition);
@@ -386,7 +374,7 @@ function requestHeight(x, y, mode, realPosition, markerCounter) {
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Add Marker with Elevation and Polyline
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////else /////////////////////////////////////////////////////////////////////////////////////////////////////////
 function onMapClick(e) {
 
     //Add a popup where the user can choose between some buttons
@@ -405,20 +393,8 @@ function onMapClick(e) {
 
 }
 
-function testFun(e) {
-
-    //Convert the map coordinates to game coordinates
-    var point = projectCoordinates([e.latlng.lng, e.latlng.lat])
-
-    console.log(point);
-}
-
+//Mouse events
 map.on('drag', function() {
     map.panInsideBounds(bounds, { animate: false });
 });
-
-map.on('click', testFun);
-
 map.on('contextmenu', onMapClick);
-
-//map.on('click', onMapClick);
