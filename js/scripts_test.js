@@ -5,12 +5,12 @@
 
 
 //Mission impossible
-var factorx = (54613 + 1/3);
-var factory = (54613 + 1/3);
+var factorx = (54613 + 1 / 3);
+var factory = (54613 + 1 / 3);
 
 L.CRS.pr = L.extend({}, L.CRS.Simple, {
     projection: L.Projection.LonLat,
-    transformation: new L.Transformation(1/factorx, 0, 1/factory, 0),
+    transformation: new L.Transformation(1 / factorx, 0, 1 / factory, 0),
     // Changing the transformation is the key part, everything else is the same.
     // By specifying a factor, you specify what distance in meters one pixel occupies (as it still is CRS.Simple in all other regards).
     // In this case, I have a tile layer with 256px pieces, so Leaflet thinks it's only 256 meters wide.
@@ -205,10 +205,15 @@ function popupContent(elevation, direction, firemode, mode) {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Create new Marker
+//Create new marker
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-var markerArray = [0];
-function addMarker(point, type, elevation, direction, firemode) {
+var markerArray = [[0, "artillery"]];
+delete markerArray[0];
+
+function addMarker(point, type, elevation, direction, firemode, counter) {
+
+    //Initialize new array parameters
+    markerArray[counter] = [0, type];
 
     //Decide which icon to use
     if (type == "target") {
@@ -216,41 +221,46 @@ function addMarker(point, type, elevation, direction, firemode) {
     } else {
         var markerURL = 'img/pinDrop.png';
     }
-    
+
     //Create icon for marker
     var markerIcon = L.icon({
-      iconUrl: markerURL,
-      iconSize: [50, 50],
-      iconAnchor: [25, 50],
-      popupAnchor: [0, -60],
+        iconUrl: markerURL,
+        iconSize: [50, 50],
+        iconAnchor: [25, 50],
+        popupAnchor: [0, -60],
     });
 
-    //Count through all markers to get index for new marker
-    var counter = 0;
-    while (markerArray[counter] != null && markerArray[counter] != 0) {
-        counter += 1;
-    }
-
     //Create Marker
-    markerArray[counter] = L.marker([point[1], point[0]], {
+    markerArray[counter][0] = L.marker([point[1], point[0]], {
         icon: markerIcon,
         draggable: 'true'
     }).addTo(map);
 
     //If marker has been draged, request new data for it
-    markerArray[counter].on('dragend', function (e) {
+    markerArray[counter][0].on('dragend', function (e) {
         var tempPos = this.getLatLng();
         var point = projectCoordinates([tempPos.lng, tempPos.lat]);
         requestHeight(point[0], point[1], "update", [tempPos.lng, tempPos.lat], counter);
     });
 
     //If marker was right-clicked
-    markerArray[counter].on('contextmenu', function (e) {
-        map.removeLayer(markerArray[counter]);
-    });
+    if (type == "target") {
+        markerArray[counter][0].on('contextmenu', function (e) {
+            map.removeLayer(markerArray[counter][0]);
+            delete markerArray[counter];
+        });
+    } else {
+
+        markerArray[counter][0].on('contextmenu', function (e) {
+            map.removeLayer(shootingBoundaries);
+            map.removeLayer(markerArray[counter][0]);
+            delete markerArray[counter];
+        });
+    }
+
 
     //Populate marker popup
-    markerArray[counter].bindPopup(popupContent(elevation, direction, firemode, type), {
+    markerArray[counter][0].bindPopup(popupContent(elevation, direction, firemode, type), {
         closeOnClick: false,
         autoClose: false
     }).openPopup();
@@ -264,61 +274,75 @@ function heightdataCallback(game, mapp, message, mode, markerCounter) {
 
     var arrayCount = (target.length);
 
-    if (mode == "update" && markerCounter > 0) {
-        //Update it's positions
-        target[markerCounter].position = [game[0], game[1], (message + 1.7)];
+    if (mode == "update") {
 
-        //Calculate other variables
-        target[markerCounter].calculateTrajectoryProjectileMotion(artilleryPosition);
+        if (markerCounter == 0) {
 
-        //Populate popup content with the new data
-        markerArray[markerCounter].setPopupContent(popupContent(target[markerCounter].gunElevation, target[markerCounter].direction, target[markerCounter].firemode, "target")).openPopup();
+            //Set poition for artillery unit
+            artilleryPosition = [game[0], game[1], (message + 1.7)];
+
+            //Populate popup content with the new data
+            markerArray[markerCounter][0].setPopupContent(popupContent(-1, -1, -1, "artillery")).openPopup();
+
+            //Draw boundary circle
+            map.removeLayer(shootingBoundaries);
+            shootingBoundaries = L.circle([mapp[1], mapp[0]], {
+                radius: 826
+            }).addTo(map);
+
+        } else {
+            //Update it's positions
+            target[markerCounter].position = [game[0], game[1], (message + 1.7)];
+
+            //Calculate other variables
+            target[markerCounter].calculateTrajectoryProjectileMotion(artilleryPosition);
+
+            //Populate popup content with the new data
+            markerArray[markerCounter][0].setPopupContent(popupContent(target[markerCounter].gunElevation, target[markerCounter].direction, target[markerCounter].firemode, "target")).openPopup();
+        }
+
+    } else {
+        var counter = 0;
+        while (true) {
+
+            if (markerArray[counter] == null) {
+
+                //Add marker to the array
+                target.push(new Marking([game[0], game[1], message]));
+                arrayCount = (target.length) - 1;
+
+                if (markerArray[0] == null) {
+
+                    var type = "artillery";
+
+                    //Set poition for artillery unit
+                    artilleryPosition = [game[0], game[1], (message + 1.7)];
+
+                    //Add the marker for the artillery unit
+                    addMarker(mapp, type, [0, 0], 0, "None", counter);
+
+                    shootingBoundaries = L.circle([mapp[1], mapp[0]], {
+                        radius: 826
+                    }).addTo(map);
+
+
+                } else {
+                    var type = "target";
+
+                    //Calculate all associate data
+                    target[arrayCount].calculateTrajectoryProjectileMotion(artilleryPosition);
+
+                    //Add the marker for the target
+                    addMarker(mapp, type, [target[arrayCount].gunElevation[0], target[arrayCount].gunElevation[1]], target[arrayCount].direction, target[arrayCount].firemode, counter);
+                }
+
+                break;
+
+            } else {
+                counter += 1;
+            }
+        }
     }
-
-    if (mode == "update" && markerCounter == 0) {
-
-        //Set poition for artillery unit
-        artilleryPosition = [game[0], game[1], (message + 1.7)];
-
-        //Populate popup content with the new data
-        markerArray[markerCounter].setPopupContent(popupContent(-1, -1, -1, "artillery")).openPopup();
-
-        //Draw boundary circle
-        map.removeLayer(shootingBoundaries);
-        shootingBoundaries = L.circle([mapp[1], mapp[0]], {
-            radius: 495
-        }).addTo(map);
-    }
-
-    //Set position for artillery (The first time you click on the map)
-    if (arrayCount == 1 && artilleryPosition[0] == 1) {
-
-        //Set poition for artillery unit
-        artilleryPosition = [game[0], game[1], (message + 1.7)];
-
-        //Add the marker for the artillery unit
-        addMarker(mapp, "artillery", [0, 0], 0, "None");
-
-        shootingBoundaries = L.circle([mapp[1], mapp[0]], {
-            radius: 826
-        }).addTo(map);
-
-        //Create new targets
-    } else if (mode == "create") {
-
-        //Add marker to the array
-        target.push(new Marking([game[0], game[1], message]));
-        arrayCount = (target.length) - 1;
-        
-        console.log(message);
-
-        //Calculate all associate data
-        target[arrayCount].calculateTrajectoryProjectileMotion(artilleryPosition);
-
-        //Add the marker for the target
-        addMarker(mapp, "target", [target[arrayCount].gunElevation[0], target[arrayCount].gunElevation[1]], target[arrayCount].direction, target[arrayCount].firemode);
-    }
-
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -394,7 +418,10 @@ function onMapClick(e) {
 }
 
 //Mouse events
-map.on('drag', function() {
-    map.panInsideBounds(bounds, { animate: false });
+map.on('drag', function () {
+
+    map.panInsideBounds(bounds, {
+        animate: false
+    });
 });
 map.on('contextmenu', onMapClick);
