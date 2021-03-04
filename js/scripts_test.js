@@ -222,24 +222,18 @@ function addMarker(point, type, elevation, direction, firemode) {
 
     //Decide which icon to use
     if (type == "target") {
-
-        var markerIcon = L.icon({
-            iconUrl: 'img/pin.png',
-            iconSize: [50, 50],
-            iconAnchor: [25, 50],
-            popupAnchor: [0, -60],
-        });
-
+        var markerURL = 'img/pin.png';
     } else {
-
-        var markerIcon = L.icon({
-            iconUrl: 'img/pinDrop.png',
-            iconSize: [50, 50],
-            iconAnchor: [25, 50],
-            popupAnchor: [0, -60],
-        });
-
+        var markerURL = 'img/pinDrop.png';
     }
+    
+    //Create icon for marker
+    var markerIcon = L.icon({
+      iconUrl: markerURL,
+      iconSize: [50, 50],
+      iconAnchor: [25, 50],
+      popupAnchor: [0, -60],
+    });
 
     //Count through all markers to get index for new marker
     var counter = 0;
