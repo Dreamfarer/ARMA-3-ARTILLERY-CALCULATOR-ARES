@@ -8,11 +8,6 @@
 var shootingBoundaries;
 var artilleryPosition = [1, 1, 1];
 var gravity = 9.80665;
-var southWest = map.unproject([0.025, 0.488]); //(Leftborder x / )
-var northEast = map.unproject([0.53, 0.08]); //(Rightborder x / )
-
-var markerArray = [[0, "artillery", new Marking([0, 0, 0])]];
-delete markerArray[0];
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Modify coordinate system of Leaflet
@@ -54,6 +49,8 @@ var map = L.map('map', {
 });
 
 //Set boundaries
+var southWest = map.unproject([0.025, 0.488]); //(Leftborder x / )
+var northEast = map.unproject([0.53, 0.08]); //(Rightborder x / )
 var bounds = L.latLngBounds(southWest, northEast);
 map.setMaxBounds(bounds);
 
@@ -186,6 +183,10 @@ class Marking {
 
     }
 }
+
+//Initialization of markers
+var markerArray = [[0, "artillery", new Marking([0, 0, 0])]];
+delete markerArray[0];
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Return Popup Content
@@ -455,7 +456,7 @@ map.on('drag', function (e) {
 });
 map.on('click', function (e) {
 
-    console.log(projectCoordinates([e.latlng.lng, e.latlng.lat]))
+    //console.log(projectCoordinates([e.latlng.lng, e.latlng.lat]))
 
 });
 map.on('contextmenu', onMapClick);
