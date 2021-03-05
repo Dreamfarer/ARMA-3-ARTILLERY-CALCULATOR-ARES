@@ -1,23 +1,29 @@
-//USE bedartch_ARES
 //magick convert -crop 256x256 ContourMap.jpg tilesLevel0/tile%01d.jpg
 //Dir | Rename-Item -NewName {$_.name -replace "-" , ""}
 //magick convert ContourMap.jpg -resize 9216x9216 CountourMap_2.jpg
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Global variables
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var shootingBoundaries;
+var artilleryPosition = [1, 1, 1];
+var gravity = 9.80665;
+var southWest = map.unproject([0.025, 0.488]); //(Leftborder x / )
+var northEast = map.unproject([0.53, 0.08]); //(Rightborder x / )
 
-//Mission impossible
+var markerArray = [[0, "artillery", new Marking([0, 0, 0])]];
+delete markerArray[0];
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Modify coordinate system of Leaflet
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var factorx = (54613 + 1 / 3);
 var factory = (54613 + 1 / 3);
-
 L.CRS.pr = L.extend({}, L.CRS.Simple, {
     projection: L.Projection.LonLat,
-    transformation: new L.Transformation(1 / factorx, 0, 1 / factory, 0),
+    
     // Changing the transformation is the key part, everything else is the same.
-    // By specifying a factor, you specify what distance in meters one pixel occupies (as it still is CRS.Simple in all other regards).
-    // In this case, I have a tile layer with 256px pieces, so Leaflet thinks it's only 256 meters wide.
-    // I know the map is supposed to be 2048x2048 meters, so I specify a factor of 0.125 to multiply in both directions.
-    // In the actual project, I compute all that from the gdal2tiles tilemapresources.xml, 
-    // which gives the necessary information about tilesizes, total bounds and units-per-pixel at different levels.
-
+    transformation: new L.Transformation(1 / factorx, 0, 1 / factory, 0),
 
     // Scale, zoom and distance are entirely unchanged from CRS.Simple
     scale: function (zoom) {
@@ -37,8 +43,6 @@ L.CRS.pr = L.extend({}, L.CRS.Simple, {
     infinite: true
 });
 
-var shootingBoundaries;
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Map Initialization
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -49,12 +53,11 @@ var map = L.map('map', {
     maxBoundsViscosity: 1
 });
 
-var southWest = map.unproject([0.025, 0.488]); //(Leftborder x / )
-var northEast = map.unproject([0.53, 0.08]); //(Rightborder x / )
+//Set boundaries
 var bounds = L.latLngBounds(southWest, northEast);
-
 map.setMaxBounds(bounds);
 
+//Add tiles
 L.tileLayer('map/{z}/map_{x}_{y}.jpg', {
     attribution: 'Map data from Arma 3 &copy; Bohemia Interactive',
     maxNativeZoom: 15,
@@ -72,9 +75,11 @@ function projectCoordinates(point) {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//Setup for artillery
+//Calculate elevation offset based on sourrounding incline
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-var artilleryPosition = [1, 1, 1];
+function elevationOffset () {
+  //We need 4 points (corners)
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Class for artillery unit and targets
@@ -84,13 +89,13 @@ class Marking {
     constructor(position) {
         //Must be given as parameters
         this.position = position;
-
+        
+        //Other variables
         this.firemode = "Close";
         this.distance = 0;
         this.velocity = 0;
         this.direction = 0;
         this.gunElevation = [0, 0];
-
         this.heightDifference = 0;
     }
 
@@ -124,22 +129,22 @@ class Marking {
 
         if (distanceLocal >= 826 && distanceLocal <= 2237) {
             this.firemode = "Close";
-            this.velocity = 153.9; //0.19
+            this.velocity = 153.9; //Initial velocity: 810*0.19 m/s
         }
 
         if (distanceLocal > 2237 && distanceLocal <= 5646) {
             this.firemode = "Medium";
-            this.velocity = 243; //0.3
+            this.velocity = 243; //Initial velocity: 810*0.3 m/s
         }
 
         if (distanceLocal > 5646 && distanceLocal <= 15029) {
             this.firemode = "Far";
-            this.velocity = 388.8; //0.48
+            this.velocity = 388.8; //Initial velocity: 810*0.48 m/s
         }
 
         if (distanceLocal > 15029 && distanceLocal <= 42818) {
             this.firemode = "Further";
-            this.velocity = 648; //0.48
+            this.velocity = 648; //Initial velocity: 810*0.48 m/s
         }
 
         if (this.velocity == 0) {
@@ -171,14 +176,12 @@ class Marking {
             return false;
         }
 
-        var gravity = 9.80665;
-
         //Calculate both projectile trajectory parabolas
         this.gunElevation[0] = (Math.atan((Math.pow(this.velocity, 2) - Math.sqrt(Math.pow(this.velocity, 4) - (gravity * ((gravity * Math.pow(this.distance, 2)) + (2 * this.heightDifference * Math.pow(this.velocity, 2)))))) / (gravity * this.distance))) * 180 / Math.PI;
 
         this.gunElevation[1] = (Math.atan((Math.pow(this.velocity, 2) + Math.sqrt(Math.pow(this.velocity, 4) - (gravity * ((gravity * Math.pow(this.distance, 2)) + (2 * this.heightDifference * Math.pow(this.velocity, 2)))))) / (gravity * this.distance))) * 180 / Math.PI;
 
-        //To reset the boundary tracker
+        //To reset the firemode tracker
         this.velocity = 0;
 
     }
@@ -207,9 +210,6 @@ function popupContent(elevation, direction, firemode, mode) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Create new marker
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-var markerArray = [[0, "artillery", new Marking([0, 0, 0])]];
-delete markerArray[0];
-
 function addMarker(point, type, elevation, direction, firemode, counter) {
 
     //Decide which icon to use
@@ -255,13 +255,12 @@ function addMarker(point, type, elevation, direction, firemode, counter) {
         });
     }
 
-
     //Populate marker popup
     markerArray[counter][0].bindPopup(popupContent(elevation, direction, firemode, type), {
         closeOnClick: false,
         autoClose: false
     }).openPopup();
-
+    
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -272,7 +271,8 @@ function heightdataCallback(game, mapp, message, mode, markerCounter, start) {
     if (mode == "update") {
 
         var goal = markerArray.length;
-
+        
+        //Go this path to update artillery when dragged
         if (markerCounter == 0) {
 
             //Set poition for artillery unit
@@ -292,7 +292,8 @@ function heightdataCallback(game, mapp, message, mode, markerCounter, start) {
             }
 
             return;
-
+        
+        //Go this path to update target when independetly dragged
         } else {
 
             if (markerCounter != -9) {
@@ -302,7 +303,7 @@ function heightdataCallback(game, mapp, message, mode, markerCounter, start) {
             }
 
         }
-
+        
         if (markerArray[start] != null && start <= goal) {
 
             //Update it's positions
@@ -315,7 +316,8 @@ function heightdataCallback(game, mapp, message, mode, markerCounter, start) {
 
             //Populate popup content with the new data
             markerArray[start][0].setPopupContent(popupContent(markerArray[start][2].gunElevation, markerArray[start][2].direction, markerArray[start][2].firemode, "target")).openPopup();
-
+            
+            //Enter recursion loop if artillery unit has been dragged and all target need updates
             if (markerArray[start + 1] != null && markerCounter == -9) {
                 requestHeight([markerArray[start + 1][2].position[0], markerArray[start + 1][2].position[1]], mapp, "", "update", -9, start + 1);
             }
@@ -326,11 +328,11 @@ function heightdataCallback(game, mapp, message, mode, markerCounter, start) {
         //Count the marker from start to end; finish when a null-entry is found
         var counter = 0;
         while (true) {
-
             if (markerArray[counter] == null) {
 
                 if (markerArray[0] == null) {
-
+                    
+                    //Define marker type
                     var type = "artillery";
 
                     //Initialize new array parameters
@@ -341,13 +343,15 @@ function heightdataCallback(game, mapp, message, mode, markerCounter, start) {
 
                     //Add the marker for the artillery unit
                     addMarker(mapp, type, [0, 0], 0, "None", counter);
-
+                    
+                    //Adding circle to show minimal shooting distance
                     shootingBoundaries = L.circle([mapp[1], mapp[0]], {
                         radius: 826
                     }).addTo(map);
 
-
                 } else {
+                  
+                    //Define marker type
                     var type = "target";
                     
                     //Initialize new array parameters
@@ -360,9 +364,7 @@ function heightdataCallback(game, mapp, message, mode, markerCounter, start) {
                     addMarker(mapp, type, [markerArray[counter][2].gunElevation[0], markerArray[counter][2].gunElevation[1]], markerArray[counter][2].direction, markerArray[counter][2].firemode, counter);
 
                 }
-
                 break;
-
             } else {
                 counter += 1;
             }
@@ -415,7 +417,7 @@ function requestHeight(game, mapp, message, mode, markerCounter, start) {
     };
 
     xhr.onerror = function () {
-        //
+        alert("Error encountered while requesting height data! Please report :)");
     };
 
     xhr.send();
