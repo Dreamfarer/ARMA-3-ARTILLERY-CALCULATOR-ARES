@@ -186,7 +186,7 @@ function elevationOffset(angle, elevation) {
 
     //Stich together target vector
     elevation = elevation * (Math.PI / 180);
-    var targetVector = [Math.sin(elevation), Math.sin(elevation), 0];
+    var targetVector = [Math.cos(elevation), Math.sin(elevation), 0];
     targetVector = rotate(targetVector, -1 * angle, [0, 1, 0]);
     display("Target Vector", targetVector, "vector");
 
@@ -296,7 +296,6 @@ function elevationOffset(angle, elevation) {
     console.log("End Elevation: " + correctionSideSum);
     console.log("End Elevation Check: " + getDir([0, 0, 1], upwards, "side") * 2 * 180 / Math.PI);
     console.log("End Direction: " + (inputAngle + (correctionTopSum * -1)));
-
 
 }
 
@@ -679,7 +678,7 @@ map.on('drag', function (e) {
 map.on('click', function (e) {
 
     //console.log(projectCoordinates([e.latlng.lng, e.latlng.lat]))
-    elevationOffset(179, 45);
+    elevationOffset(179, 60);
 
 });
 map.on('contextmenu', onMapClick);
