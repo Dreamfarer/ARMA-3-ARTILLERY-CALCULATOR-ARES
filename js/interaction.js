@@ -22,7 +22,7 @@ function onMapClick(e) {
 //Mouse events
 map.on('drag', function (e) {
 
-    console.log(markerArray);
+    //console.log(markerArray);
 
     map.panInsideBounds(bounds, {
         animate: false
@@ -31,7 +31,8 @@ map.on('drag', function (e) {
 map.on('click', function (e) {
 
     //console.log(projectCoordinates([e.latlng.lng, e.latlng.lat]))
-    elevationOffset(179, 60);
+    //elevationOffset(179, 60);
+    //gatherHeightDataCallback(10, 2);
 
 });
 map.on('contextmenu', onMapClick);

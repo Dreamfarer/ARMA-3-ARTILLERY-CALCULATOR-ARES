@@ -17,6 +17,34 @@ function projectCoordinates(point) {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Calculate between systems
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function transform(angle, convert) {
+
+    if (convert == true) {
+        angle = 360 - angle;
+        angle = angle + 90;
+
+        if (angle > 360) {
+            angle = angle - 360;
+        }
+
+    } else {
+        angle = angle - 90;
+
+        if (angle < 0) {
+            angle = 360 + angle;
+        }
+
+        angle = 360 - angle;
+
+    }
+
+
+    return angle;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Class for artillery unit and targets
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class Marking {
@@ -118,6 +146,8 @@ class Marking {
 
         //To reset the firemode tracker
         this.velocity = 0;
+
+        var update = gatherHeightData(transform(this.direction, true), this.gunElevation[0], [artilleryPosition[0], artilleryPosition[1]]);
 
     }
 }
@@ -346,8 +376,16 @@ function requestHeight(game, mapp, message, mode, markerCounter, start) {
 
             //Finished
             message = parseFloat(xhr.responseText)
-            heightdataCallback(game, mapp, message, mode, markerCounter, start);
+
+            if (mode == "offset") {
+                gatherHeightDataCallback(message, markerCounter);
+            } else {
+                heightdataCallback(game, mapp, message, mode, markerCounter, start);
+
+            }
+
             return; // this will alert "true";
+
         }
     }
 
