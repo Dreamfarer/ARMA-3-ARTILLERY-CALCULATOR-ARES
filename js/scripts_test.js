@@ -141,11 +141,17 @@ function getDir(vector1, vector2, axis) {
 
         var vec1 = normalize([vector1[0], 0, vector1[2]]);
         var vec2 = normalize([vector2[0], 0, vector2[2]]);
+        
+        var overflowChecker = (dot(vec1, vec2) / (magnitude(vec1) * magnitude(vec2)));
+        
+        if (overflowChecker > 1) {
+            overflowChecker = 1;
+        }
 
-        return Math.acos(dot(vec1, vec2) / (magnitude(vec1) * magnitude(vec2))) / 2;
+        return Math.acos(overflowChecker) / 2;
 
     } else {
-        
+
         //1 Modified, 2 Target
 
         var vec1 = normalize([vector1[0], vector2[1], vector1[2]]);
@@ -209,7 +215,7 @@ function elevationOffset(angle, elevation) {
     var modifiedVector = rotate(startVector, -1 * angle, normalVectorTank);
 
     //Perpendicular Vector (Use 90° to calculate it)
-    var perpendicular = rotate(modifiedVector, -1 * 1.5707, normalVectorTank);
+    var perpendicular = normalize(cross(modifiedVector,normalVectorTank));
 
     //Upwards rotated Vector (Bsp. 10° = 0.174), this is the displayed value in the tank!
     var upwards = rotate(modifiedVector, 0.174, perpendicular);
@@ -247,12 +253,12 @@ function elevationOffset(angle, elevation) {
     } else {
         condition = "Plus";
     }
-    
+
     console.log("------------------------------------------------");
     console.log("Loop->");
-    
+
     counter = 0;
-    while (counter < 10) {
+    while (counter < 20) {
 
         console.log("------------------------------------------------");
 
@@ -271,8 +277,10 @@ function elevationOffset(angle, elevation) {
         correctionTopSum += (correctionTop * 180 / Math.PI);
 
         correctionSide = getDir(modifiedVector, targetVector, "side");
+
+        perpendicular = normalize(cross(modifiedVector,normalVectorTank));;
         
-        perpendicular = rotate(modifiedVector, -1 * 1.5707, normalVectorTank);
+        display("Perpendicular Vector", perpendicular, "vector");
 
         upwards = rotate(modifiedVector, correctionSide, perpendicular);
         display("Correction Side", (correctionSide * 180 / Math.PI), "scalar");
@@ -671,7 +679,7 @@ map.on('drag', function (e) {
 map.on('click', function (e) {
 
     //console.log(projectCoordinates([e.latlng.lng, e.latlng.lat]))
-    elevationOffset(180, 45);
+    elevationOffset(179, 45);
 
 });
 map.on('contextmenu', onMapClick);
