@@ -145,12 +145,29 @@ function getDir(vector1, vector2, axis) {
         return Math.acos(dot(vec1, vec2) / (magnitude(vec1) * magnitude(vec2))) / 2;
 
     } else {
+        
+        //1 Modified, 2 Target
 
-        var vec1 = normalize(vector1);
+        var vec1 = normalize([vector1[0], vector2[1], vector1[2]]);
         var vec2 = normalize(vector2);
 
         return Math.acos(dot(vec1, vec2) / (magnitude(vec1) * magnitude(vec2))) / 2;
     }
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Display telemetry stuff of approximation function
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function display(message, data, type) {
+
+    if (type == "vector") {
+        console.log(message + ": v=(" + data[0].toFixed(2) + "," + data[2].toFixed(2) + "," + data[1].toFixed(2) + ")");
+    }
+
+    if (type == "scalar") {
+        console.log(message + ": " + data.toFixed(2));
+    }
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,7 +182,7 @@ function elevationOffset(angle, elevation) {
     elevation = elevation * (Math.PI / 180);
     var targetVector = [Math.sin(elevation), Math.sin(elevation), 0];
     targetVector = rotate(targetVector, -1 * angle, [0, 1, 0]);
-    console.log("Target Vector: " + targetVector);
+    display("Target Vector", targetVector, "vector");
 
     //Calculate normalvectors of all 4 planes
     //BEISPIEL: 5 Höhenabfragen = 1, 2, 3, 4, 5
@@ -177,8 +194,10 @@ function elevationOffset(angle, elevation) {
     var normalVectorPlane4 = cross([5, 1 - origin[1], 0], [0, 5 - origin[1], -5]); //Normalvector for bottom-left corner
 
     //Add the normalvectors together and produce a normalized normalvector of the center / This is the axis where the turret turns around
-    //var normalVectorTank = normalize(add_vector_vector(add_vector_vector(add_vector_vector(normalVectorPlane1, normalVectorPlane2), normalVectorPlane3), normalVectorPlane4));
-    var normalVectorTank = [0, 1, 0];
+    var normalVectorTank = normalize(add_vector_vector(add_vector_vector(add_vector_vector(normalVectorPlane1, normalVectorPlane2), normalVectorPlane3), normalVectorPlane4));
+    //var normalVectorTank = [0, 1, 0];
+
+    display("Normal Vector", normalVectorTank, "vector");
 
     //Decide if to add or to remove from angle
     var condition = "Plus";
@@ -195,11 +214,12 @@ function elevationOffset(angle, elevation) {
     //Upwards rotated Vector (Bsp. 10° = 0.174), this is the displayed value in the tank!
     var upwards = rotate(modifiedVector, 0.174, perpendicular);
 
-    console.log("Modified Vector: " + modifiedVector);
-    console.log("Perpendicular Vector: " + perpendicular);
-    console.log("Upward: " + upwards);
+    display("Perpendicular Vector", perpendicular, "vector");
 
-    console.log("Elevation Check: " + getDir([0, 0, 1], upwards, "side") * 2 * 180 / Math.PI);
+    console.log("------------------------------------------------");
+
+    display("Modified Vector", modifiedVector, "vector");
+    display("Upward Vector", upwards, "vector");
 
     //It works until here!
     //Now up to the difficult part... approximation
@@ -209,15 +229,16 @@ function elevationOffset(angle, elevation) {
     //1. We go directly to the target above
     //2. With the upper part (The 10° incline) we need to figure out if we need to add angle or take back.
     var correctionTop = getDir(upwards, targetVector, "top");
-    console.log("Correction from top: " + correctionTop * 180 / Math.PI);
+    var correctionSide = 0;
+    //console.log("Correction from top: " + correctionTop * 180 / Math.PI);
 
     //The problem is that it can't tell us if we should move left or right, the best thing would be to check real quick by trying
     modifiedVector = rotate(upwards, correctionTop, normalVectorTank);
-    console.log("Corrected modified vector: " + modifiedVector);
+    //console.log("Corrected modified vector: " + modifiedVector);
 
     //We need to get directions again, compare, and take action 
     var newCorrectionTop = getDir(modifiedVector, targetVector, "top");
-    console.log("NEW Correction from top: " + correctionTop * 180 / Math.PI);
+    //console.log("NEW Correction from top: " + correctionTop * 180 / Math.PI);
 
     //We will need to reverse correctionTop in that case
     if (newCorrectionTop > correctionTop) {
@@ -226,36 +247,16 @@ function elevationOffset(angle, elevation) {
     } else {
         condition = "Plus";
     }
-
-    //We can add this to the total amount of angle
-    correctionTopSum += (correctionTop * 180 / Math.PI);
-
-    //Carry on with approximation
-    modifiedVector = rotate(upwards, correctionTop, normalVectorTank);
-    console.log("New Corrected modified vector: " + modifiedVector);
-
-    //Now we need to adjust elevation too
-    var correctionSide = getDir(modifiedVector, targetVector, "side");
-    console.log("Correction from side: " + (correctionSide * 180 / Math.PI));
-
-    console.log("End Elevation Check: " + getDir([0, 0, 1], modifiedVector, "side") * 2 * 180 / Math.PI);
-
-    //Adjust the elevation
-    upwards = rotate(modifiedVector, correctionSide, perpendicular);
-    console.log("Upwards: " + upwards);
-
-    console.log("End Elevation Check: " + getDir([0, 0, 1], upwards, "side") * 2 * 180 / Math.PI);
-
-    //We can add this to the total amount of elevation
-    correctionSideSum += (correctionSide * 180 / Math.PI);
-
+    
+    console.log("------------------------------------------------");
+    console.log("Loop->");
+    
     counter = 0;
-    while (counter < 8) {
+    while (counter < 10) {
 
         console.log("------------------------------------------------");
 
         correctionTop = getDir(upwards, targetVector, "top");
-        //console.log("Correction from top: " + correctionTop * 180 / Math.PI);
 
         //Adjust with knowledge from before
         if (condition == "Minus") {
@@ -263,20 +264,19 @@ function elevationOffset(angle, elevation) {
         }
 
         modifiedVector = rotate(upwards, correctionTop, normalVectorTank);
-        //console.log("Modified vector: " + modifiedVector);
+        display("Correction Top", (correctionTop * 180 / Math.PI), "scalar");
+        display("Modified Vector", modifiedVector, "vector");
 
         //We can add this to the total amount of angle
         correctionTopSum += (correctionTop * 180 / Math.PI);
 
         correctionSide = getDir(modifiedVector, targetVector, "side");
-        console.log("Correction from side: " + correctionSide * 180 / Math.PI);
-
-        console.log("End Elevation Check: " + getDir([0, 0, 1], upwards, "side") * 2 * 180 / Math.PI);
+        
+        perpendicular = rotate(modifiedVector, -1 * 1.5707, normalVectorTank);
 
         upwards = rotate(modifiedVector, correctionSide, perpendicular);
-        console.log("Upwards: " + upwards);
-
-        console.log("End Elevation Check: " + getDir([0, 0, 1], upwards, "side") * 2 * 180 / Math.PI);
+        display("Correction Side", (correctionSide * 180 / Math.PI), "scalar");
+        display("Upward Vector", upwards, "vector");
 
         //We can add this to the total amount of elevation
         correctionSideSum += (correctionSide * 180 / Math.PI);
@@ -671,7 +671,7 @@ map.on('drag', function (e) {
 map.on('click', function (e) {
 
     //console.log(projectCoordinates([e.latlng.lng, e.latlng.lat]))
-    elevationOffset(90, 45);
+    elevationOffset(180, 45);
 
 });
 map.on('contextmenu', onMapClick);
