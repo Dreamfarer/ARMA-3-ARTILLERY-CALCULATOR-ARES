@@ -147,11 +147,13 @@ function gatherHeightDataCallback(message, number) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var angle = NaN;
 var elevation = NaN;
+var objectCounter = NaN;
 
-function gatherHeightData(inputangle, inputelevation, position) {
+function gatherHeightData(inputangle, inputelevation, position, counter) {
 
     angle = inputangle;
     elevation = inputelevation;
+    objectCounter = counter;
 
     //We reuse the scheme requestHeight(game, mapp, message, mode, markerCounter, start)
     //game: Coordinates / mapp: - / message: "" / mode: "offset" / markerCounter: Index of Array / start: -
@@ -194,8 +196,10 @@ function elevationOffset(normalVectorTank) {
         var startVector = normalize([((-1 * normalVectorTank[1]) / normalVectorTank[0]), 1, 0]);
     }
 
-    startVector[0] = Math.abs(startVector[0]);
-    normalize(startVector);
+    if (startVector[0] < 0) {
+        startVector = rotate(startVector, -1 * Math.PI, normalVectorTank);
+    }
+
     display("Start Vector", startVector, "vector");
 
     //Rotate turret
@@ -203,18 +207,30 @@ function elevationOffset(normalVectorTank) {
     var modifiedVector = rotate(startVector, -1 * angle, normalVectorTank);
     var after = getDir(startVector, modifiedVector, "top") * 2;
 
-    //We can add this to the total amount of angle
-    var correctionTopSum = Math.abs(0 - after);
+    if (angle > Math.PI) {
+        after = Math.PI + Math.PI - after;
+    }
+
+    correctionTopSum = after;
 
     //Check if shooting is even possible
     if (modifiedVector[1] > targetVector[1]) {
-        console.log("Angle too flat; Shooting not possible")
+        console.log("Angle too flat; Shooting not possible");
+
+        markerArray[objectCounter][0].setPopupContent(popupContent(NaN, NaN, NaN, "NaN")).openPopup();
+
+        //Reset these variables to be used again later
+        angle = NaN;
+        elevation = NaN;
+        heightData = [NaN, NaN, NaN, NaN];
+        objectCounter = NaN;
+
         return;
     }
 
     //Elevate the turret
-    var perpendicular = normalize(cross(modifiedVector, normalVectorTank));
     var correctionSide = getDir(modifiedVector, targetVector, "side");
+    perpendicular = normalize(cross(modifiedVector, normalVectorTank));
     modifiedVector = rotate(modifiedVector, correctionSide, perpendicular);
 
     //Check to which side the turret should be turning
@@ -222,19 +238,14 @@ function elevationOffset(normalVectorTank) {
     var directionChecker = rotate(modifiedVector, correctionTop, normalVectorTank);
     var newCorrectionTop = getDir(directionChecker, targetVector, "top");
     if (newCorrectionTop > correctionTop) {
-        correctionTop = correctionTop * -1;
         condition = "Minus";
-        var correctionSideSum = correctionSide;
     } else {
         condition = "Plus";
-        var correctionSideSum = correctionSide * -1;
     }
-    
-    console.log(condition);
+
+    var correctionSideSum = correctionSide;
 
     //This counts the 
-    
-
     var counter = 0;
     while (counter < 15) {
 
@@ -243,7 +254,7 @@ function elevationOffset(normalVectorTank) {
         correctionSide = getDir(modifiedVector, targetVector, "side");
 
         //Decide with knowledge from before
-        if (condition == "Minus") {
+        if (condition == "Plus") {
             correctionTop = correctionTop * -1;
         }
 
@@ -257,8 +268,8 @@ function elevationOffset(normalVectorTank) {
 
             //We can add this to the total amount of angle
             correctionTopSum += Math.abs(before - after);
-            
-            display("Approximation TOP", modifiedVector, "vector");
+
+            display("Approximation Vector TOP", modifiedVector, "vector");
 
         } else {
 
@@ -290,12 +301,21 @@ function elevationOffset(normalVectorTank) {
     console.log("Original Angle: " + transform(inputAngle, false));
     console.log("Strife: " + transform((correctionTopSum * 180 / Math.PI), false));
 
-    console.log("Diviation from perfect direction: " + (correctionTop * 180 / Math.PI));
-    console.log("Diviation from perfect elevation: " + (correctionSide * 180 / Math.PI));
+    //console.log("Diviation from perfect direction: " + (correctionTop * 180 / Math.PI));
+    //console.log("Diviation from perfect elevation: " + (correctionSide * 180 / Math.PI));
+
+    //Write into the objects
+    markerArray[objectCounter][2].gunElevation[2] = (correctionSideSum * 180 / Math.PI);
+    markerArray[objectCounter][2].direction[1] = transform((correctionTopSum * 180 / Math.PI), false);
+
+    markerArray[objectCounter][0].setPopupContent(popupContent(markerArray[objectCounter][2].gunElevation, markerArray[objectCounter][2].direction, markerArray[objectCounter][2].firemode, "target")).openPopup();
 
     //Reset these variables to be used again later
     angle = NaN;
     elevation = NaN;
     heightData = [NaN, NaN, NaN, NaN];
+    objectCounter = NaN;
+
+    return
 
 }

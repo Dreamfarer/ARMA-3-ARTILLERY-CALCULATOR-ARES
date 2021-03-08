@@ -57,8 +57,8 @@ class Marking {
         this.firemode = "Close";
         this.distance = 0;
         this.velocity = 0;
-        this.direction = 0;
-        this.gunElevation = [0, 0];
+        this.direction = [0, 0];
+        this.gunElevation = [0, 0, 0];
         this.heightDifference = 0;
     }
 
@@ -67,22 +67,22 @@ class Marking {
 
         //0° to 90°, x: positive, y: positive
         if (distanceComponents[0] >= 0 && distanceComponents[1] >= 0) {
-            this.direction = 90 - (Math.abs(Math.atan2(distanceComponents[1], distanceComponents[0])) * 180.0 / Math.PI);
+            this.direction[0] = 90 - (Math.abs(Math.atan2(distanceComponents[1], distanceComponents[0])) * 180.0 / Math.PI);
         }
 
         //90° to 180°, x: positive, y: negative
         if (distanceComponents[0] >= 0 && distanceComponents[1] < 0) {
-            this.direction = 90 + (Math.abs(Math.atan2(distanceComponents[1], distanceComponents[0])) * 180.0 / Math.PI);
+            this.direction[0] = 90 + (Math.abs(Math.atan2(distanceComponents[1], distanceComponents[0])) * 180.0 / Math.PI);
         }
 
         //180° to 270°, x: negative, y: negative
         if (distanceComponents[0] < 0 && distanceComponents[1] < 0) {
-            this.direction = 90 + (Math.abs(Math.atan2(distanceComponents[1], distanceComponents[0])) * 180.0 / Math.PI);
+            this.direction[0] = 90 + (Math.abs(Math.atan2(distanceComponents[1], distanceComponents[0])) * 180.0 / Math.PI);
         }
 
         //270° to 360°, x: negative, y: positive
         if (distanceComponents[0] < 0 && distanceComponents[1] >= 0) {
-            this.direction = 450 - (Math.abs(Math.atan2(distanceComponents[1], distanceComponents[0])) * 180.0 / Math.PI);
+            this.direction[0] = 450 - (Math.abs(Math.atan2(distanceComponents[1], distanceComponents[0])) * 180.0 / Math.PI);
         }
     }
 
@@ -119,7 +119,7 @@ class Marking {
     }
 
     //Calculate the Trajectory of the Projectile Motion - THE CORE Function of this app.
-    calculateTrajectoryProjectileMotion(positionArtillery) {
+    calculateTrajectoryProjectileMotion(positionArtillery, counter) {
 
         //x and y component of distance
         var x = this.position[0] - positionArtillery[0]; //Positive when target is to the East, negative when target is to the West
@@ -147,7 +147,7 @@ class Marking {
         //To reset the firemode tracker
         this.velocity = 0;
 
-        var update = gatherHeightData(transform(this.direction, true), this.gunElevation[0], [artilleryPosition[0], artilleryPosition[1]]);
+        gatherHeightData(transform(this.direction[0], true), this.gunElevation[0], [artilleryPosition[0], artilleryPosition[1]], counter);
 
     }
 }
@@ -164,12 +164,15 @@ function popupContent(elevation, direction, firemode, mode) {
     if (mode == "target") {
 
         var begin = "<ul style='list-style-type: none; margin: 0; padding: 0;'>"
-        var messageElevation = "<li style='font-weight: bold;'> Elevation: " + (Math.ceil(elevation[0] / 0.01) * 0.01).toFixed(2) + "° or " + (Math.ceil(elevation[1] / 0.01) * 0.01).toFixed(2) + "°</li>";
+        //var messageElevation = "<li style='font-weight: bold;'> Elevation: " + (Math.ceil(elevation[0] / 0.01) * 0.01).toFixed(2) + "° or " + (Math.ceil(elevation[1] / 0.01) * 0.01).toFixed(2) + "°</li>";
+        var messageElevation = "<li style='font-weight: bold;'> Elevation: " + (Math.ceil(elevation[0] / 0.01) * 0.01).toFixed(2) + "° (Exp. " + (Math.ceil(elevation[2] / 0.01) * 0.01).toFixed(2) + "°)</li>";
+        var messageDirection = "Direction: " + (Math.ceil(direction[0] / 0.01) * 0.01).toFixed(2) + "° (Exp. " + (Math.ceil(direction[1] / 0.01) * 0.01).toFixed(2) + "°)</li>";
         var messageFiremode = "<li style='font-weight: bold; font-style: italic'> Firemode: " + firemode + "</li>";
-        var messageDirection = "Direction: " + (Math.ceil(direction / 0.01) * 0.01).toFixed(2) + "°";
         var end = "</ul>"
 
-        return begin + messageElevation + messageFiremode + messageDirection + end;
+        return begin + messageElevation + messageDirection + messageFiremode + end;
+    } else if (mode == "NaN") {
+        return "<div style='font-weight: bold;'> Shooting is not possible</div>";
     } else {
         return "2S9 Sochor";
     }
@@ -281,10 +284,7 @@ function heightdataCallback(game, mapp, message, mode, markerCounter, start) {
             }
 
             //Calculate other variables
-            markerArray[start][2].calculateTrajectoryProjectileMotion(artilleryPosition);
-
-            //Populate popup content with the new data
-            markerArray[start][0].setPopupContent(popupContent(markerArray[start][2].gunElevation, markerArray[start][2].direction, markerArray[start][2].firemode, "target")).openPopup();
+            markerArray[start][2].calculateTrajectoryProjectileMotion(artilleryPosition, start);
 
             //Enter recursion loop if artillery unit has been dragged and all target need updates
             if (markerArray[start + 1] != null && markerCounter == -9) {
@@ -327,10 +327,10 @@ function heightdataCallback(game, mapp, message, mode, markerCounter, start) {
                     markerArray[counter] = [0, type, new Marking([game[0], game[1], message])];
 
                     //Calculate all associate data
-                    markerArray[counter][2].calculateTrajectoryProjectileMotion(artilleryPosition);
+                    markerArray[counter][2].calculateTrajectoryProjectileMotion(artilleryPosition, counter);
 
                     //Add the marker for the target
-                    addMarker(mapp, type, [markerArray[counter][2].gunElevation[0], markerArray[counter][2].gunElevation[1]], markerArray[counter][2].direction, markerArray[counter][2].firemode, counter);
+                    addMarker(mapp, type, markerArray[counter][2].gunElevation, markerArray[counter][2].direction, markerArray[counter][2].firemode, counter);
 
                 }
                 break;
