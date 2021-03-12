@@ -36,3 +36,19 @@ map.on('click', function (e) {
 
 });
 map.on('contextmenu', onMapClick);
+
+var buttonChangeMode = document.getElementById('Btn3');
+buttonChangeMode.addEventListener('click', function () {
+    
+    var display = "";
+    if (artilleryMode == 0) {
+        display = "Change to '2S9 Sochor'";
+        artilleryMode = 1;
+    } else {
+        display = "Change to 'MAAWS Mk4 Mod 0'";
+        artilleryMode = 0;
+    }
+    
+    document.getElementById('Btn3').innerHTML = display;
+
+});
