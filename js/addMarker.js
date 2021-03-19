@@ -11,11 +11,11 @@ function addMarker(point, type, elevation, direction, firemode, counter) {
     }
 
     //Create icon for marker
-    var markerIcon = L.icon({
-        iconUrl: markerURL,
-        iconSize: [50, 50],
-        iconAnchor: [25, 50],
-        popupAnchor: [0, -60],
+    var markerIcon = L.divIcon({
+        className: 'custom-div-icon',
+        html: "<div style='z-index: 2000;' class='marker-pin'><div style='z-index: 2001;' class='marker-pin2'><div style='z-index: 2002;' class='marker-pin3'><div style='z-index: 2003;' class='marker-pin4'></div></div></div></div>",
+        iconSize: [30, 42],
+        iconAnchor: [15, 42]
     });
 
     //Create Marker
