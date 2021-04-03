@@ -1,4 +1,7 @@
 # Arma III ARES Artillery Calculator
+## Use ARES On My Website
+There is a live version on https://be3dart.ch/arma-3-artillery-calculator - No trackers and free of charge!
+
 ## Introduction
 ARES is a web service to calculate the elevation, heading, and fire mode needed to precisely hit a target in Arma III. Currently, it supports the artillery tanks 2S9 Sochor and M4 Scorcher. An addition to support the MAAWS Mk4 Mod 0 is on the way.
 
