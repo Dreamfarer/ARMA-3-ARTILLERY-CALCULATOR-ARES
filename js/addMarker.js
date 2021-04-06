@@ -2,20 +2,27 @@
 //Create new marker
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function addMarker(point, type, elevation, direction, firemode, counter) {
-
+    
+    //Color of marker
+    var markerColor = ["#4AA361", "#ffffff"];
+    
     //Decide which icon to use
     if (type == "target") {
-        var markerURL = 'img/pin.png';
+        markerColor[0] = "#FF0000";
     } else {
-        var markerURL = 'img/pinDrop.png';
+        markerColor[0] = "#4AA361";
     }
 
-    //Create icon for marker
+    //Build CSS for html-only marker with color variation
+    var cssString = "<div style='z-index: 2000; width: 30px; height: 30px; border-radius: 50% 50% 50% 50%; background: " + markerColor[0] + "; position: absolute; left: 50%; top: 50%; margin: -15px 0 0 -15px;'><div style='z-index: 2001; width: 20px; height: 20px; border-radius: 50% 50% 50% 50%; background: " + markerColor[1] + "; position: absolute; left: 50%; top: 50%; margin: -10px;'><div style='z-index: 2002; width: 10px; height: 10px; border-radius: 50% 50% 50% 50%; background: " + markerColor[0] + "; position: absolute; left: 50%; top: 50%; margin: -5px;'><div style='z-index: 2003; width: 40px; height: 3px; background: " + markerColor[0] + "; position: absolute; right: -15px; top: 3.5px;'><div style='z-index: 2004; width: 3px; height: 40px; background: " + markerColor[0] + "; position: absolute; right: 18.5px; top: -19px;'></div></div></div></div></div>";
+
+    //Create html only target-icon for marker
     var markerIcon = L.divIcon({
         className: 'custom-div-icon',
-        html: "<div style='z-index: 2000;' class='marker-pin'><div style='z-index: 2001;' class='marker-pin2'><div style='z-index: 2002;' class='marker-pin3'><div style='z-index: 2003;' class='marker-pin4'></div></div></div></div>",
-        iconSize: [30, 42],
-        iconAnchor: [15, 42]
+        html: cssString,
+        iconSize: [30, 30],
+        iconAnchor: [15, 15],
+        popupAnchor: [0, -22]
     });
 
     //Create Marker

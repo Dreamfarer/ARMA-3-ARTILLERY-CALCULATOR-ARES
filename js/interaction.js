@@ -30,7 +30,7 @@ map.on('drag', function (e) {
 });
 map.on('click', function (e) {
 
-    //console.log(projectCoordinates([e.latlng.lng, e.latlng.lat]))
+    console.log(projectCoordinates([e.latlng.lng, e.latlng.lat]))
     //elevationOffset(179, 60);
     //gatherHeightDataCallback(10, 2);
 
