@@ -2,15 +2,15 @@
 //Create new marker
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function addMarker(point, type, elevation, direction, firemode, counter) {
-    
+
     //Color of marker
-    var markerColor = ["#4AA361", "#ffffff"];
-    
+    var markerColor = [globalColors[1], "#ffffff"];
+
     //Decide which icon to use
     if (type == "target") {
-        markerColor[0] = "#FF0000";
+        markerColor[0] = globalColors[0];
     } else {
-        markerColor[0] = "#4AA361";
+        markerColor[0] = globalColors[1];
     }
 
     //Build CSS for html-only marker with color variation
@@ -58,4 +58,31 @@ function addMarker(point, type, elevation, direction, firemode, counter) {
         closeOnClick: false,
         autoClose: false
     }).openPopup();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Return Popup Content
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function popupContent(elevation, direction, firemode, mode) {
+
+    if (mode == "target") {
+
+        var begin = "<ul style='list-style-type: none; margin: 0; padding: 0;'>";
+        var messageElevation = "<li style='font-weight: bold;'> Elevation: " + (Math.ceil(elevation[0] / 0.01) * 0.01).toFixed(2) + "°</li>";
+        var messageDirection = "Direction: " + (Math.ceil(direction[0] / 0.01) * 0.01).toFixed(2) + "°</li>";
+        var messageFiremode = "<li style='font-weight: bold; font-style: italic'> Firemode: " + firemode + "</li>";
+        var end = "</ul>";
+        return begin + messageElevation + messageDirection + messageFiremode + end;
+
+    } else if (mode == "NaN") {
+        return "<div style='font-weight: bold;'> Shooting is not possible</div>";
+    } else {
+
+        if (artilleryMode == 0) {
+            return "2S9 Sochor";
+        } else {
+            return "MAAWS Mk4 Mod 0";
+        }
+
+    }
 }

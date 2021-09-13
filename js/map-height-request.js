@@ -1,4 +1,43 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Send PHP request to retrieve height data
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function requestHeight(game, mapp, message, mode, markerCounter, start) {
+
+    //Create new HTTP Request
+    var createCORSRequest = function (method, url) {
+        var xhr = new XMLHttpRequest();
+
+        //Error Handling
+        if ("withCredentials" in xhr) {
+            xhr.open(method, url, true);
+        }
+
+        return xhr;
+    };
+
+    //Variables to pass to server
+    var url = 'https://api.be3dart.ch/ARES.php?x=' + game[0] + '&y=' + game[1];
+    var method = 'GET';
+    var xhr = createCORSRequest(method, url);
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4) {
+
+            //Message to flaot
+            message = parseFloat(xhr.responseText)
+            heightdataCallback(game, mapp, message, mode, markerCounter, start);
+
+        }
+    }
+
+    xhr.onerror = function () {
+        alert("Error encountered while requesting height data! Please report to BE3dARt! <3");
+    };
+
+    xhr.send();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Height Data Callback
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function heightdataCallback(game, mapp, message, mode, markerCounter, start) {
@@ -19,7 +58,9 @@ function heightdataCallback(game, mapp, message, mode, markerCounter, start) {
             //Draw boundary circle
             map.removeLayer(shootingBoundaries);
             shootingBoundaries = L.circle([mapp[1], mapp[0]], {
-                radius: 826
+                radius: 826,
+                color: globalColors[2],
+                opacity: .5
             }).addTo(map);
 
             if (markerArray[1] != null) {
@@ -49,13 +90,13 @@ function heightdataCallback(game, mapp, message, mode, markerCounter, start) {
             //Calculate other variables
             markerArray[start][2].calculateTrajectoryProjectileMotion(artilleryPosition, start);
 
-            if (artilleryMode > 0) {
-                markerArray[start][0].setPopupContent(popupContent(markerArray[start][2].gunElevation, markerArray[start][2].direction, "", "target")).openPopup();
-            }
+            //Update popup content
+            markerArray[start][0].setPopupContent(popupContent(markerArray[start][2].gunElevation, markerArray[start][2].direction, markerArray[start][2].firemode, "target")).openPopup();
 
             //Enter recursion loop if artillery unit has been dragged and all target need updates
             if (markerArray[start + 1] != null && markerCounter == -9) {
                 requestHeight([markerArray[start + 1][2].position[0], markerArray[start + 1][2].position[1]], mapp, "", "update", -9, start + 1);
+
             }
         }
 
@@ -71,7 +112,7 @@ function heightdataCallback(game, mapp, message, mode, markerCounter, start) {
                     //Define marker type
                     var type = "artillery";
 
-                    //Initialize new array parameters
+                    //Initialize new array parameters and create new marker
                     markerArray[counter] = [0, type, new Marking([game[0], game[1], message])];
 
                     //Set poition for artillery unit
@@ -82,7 +123,9 @@ function heightdataCallback(game, mapp, message, mode, markerCounter, start) {
 
                     //Adding circle to show minimal shooting distance
                     shootingBoundaries = L.circle([mapp[1], mapp[0]], {
-                        radius: 826
+                        radius: 826,
+                        color: globalColors[2],
+                        opacity: .5
                     }).addTo(map);
 
                 } else {
@@ -90,7 +133,7 @@ function heightdataCallback(game, mapp, message, mode, markerCounter, start) {
                     //Define marker type
                     var type = "target";
 
-                    //Initialize new array parameters
+                    //Initialize new array parameters and create new marker
                     markerArray[counter] = [0, type, new Marking([game[0], game[1], message])];
 
                     //Calculate all associate data

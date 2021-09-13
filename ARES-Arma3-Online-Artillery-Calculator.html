@@ -21,7 +21,7 @@
 
 <body>
 
-    <div class="span9">
+    <div style="position: relative;">
         <div id="map-wrapper">
             <div id="map"></div>
 
@@ -50,20 +50,12 @@
 
             </div>
             -->
-            
-            <div style="position: absolute; right: 0%; z-index: 2000; width: 10%; top: 0; margin: 2vh">
-
-                <button class="buttons" id="Btn3"> Change to 'MAAWS Mk4 Mod 0'</button>
-
-            </div>
-
 
             <div style="position: absolute; right: 0%; z-index: 2000; width: 10%; bottom: 0; margin: 2vh">
 
-
                 <button class="buttons" id="Btn5"><i class="fa fa-code"></i> About</button>
-                <button class="buttons" id="Btn4"><i class="fa fa-cubes"></i> Report Bug</button>
-                <button class="buttons" id="Btn4" onclick="location.href='https://www.paypal.com/donate/?token=XMmSe4OvVD3aoU06JfrH9anESh6h8jmvSnE1J4slx-xNLAtlwSz7vmfqSKw_I0ktcBCwFW&country.x=CH&locale.x=CH&Z3JncnB0='" type="button"><i class="fa fa-paypal"></i> Donate</button>
+                <button class="buttons" id="Btn4" onclick="window.open('https://github.com/BE3dARt/ARMA-3-ARTILLERY-CALCULATOR-ARES/issues', '_blank');"><i class="fa fa-cubes"></i> Report Bug</button>
+                <button class="buttons" id="Btn4"><i class="fa fa-paypal"></i> Donate</button>
 
             </div>
 
@@ -75,15 +67,12 @@
 
     </div>
 
-    <script type="text/javascript" src="js/mapInitialization.js"></script>
-    <script type="text/javascript" src="js/tiltOffset.js"></script>
-    <script type="text/javascript" src="js/class.js"></script>
-    <script type="text/javascript" src="js/addMarker.js"></script>
-    <script type="text/javascript" src="js/requestHeightCallback.js"></script>
-    <script type="text/javascript" src="js/requestHeight.js"></script>
-    <script type="text/javascript" src="js/helper.js"></script>
-    <script type="text/javascript" src="js/interaction.js"></script>
-    <script type="text/javascript" src="js/maawsCalculations.js"></script>
+    <script type="text/javascript" src="js/map-initialization.js"></script>
+    <script type="text/javascript" src="js/classes.js"></script>
+    <script type="text/javascript" src="js/map-marker-and-popup.js"></script>
+    <script type="text/javascript" src="js/map-height-request.js"></script>
+    <script type="text/javascript" src="js/global.js"></script>
+    <script type="text/javascript" src="js/map-interaction.js"></script>
 
 </body>
 

@@ -43,7 +43,6 @@ class Marking {
     //Select which firemode to use
     calculateFiremode(distanceLocal) {
 
-
         if (distanceLocal >= 826 && distanceLocal <= 2237) {
             this.firemode = "Close";
             this.velocity = 153.9; //Initial velocity: 810*0.19 m/s
@@ -88,24 +87,22 @@ class Marking {
         //Calculate height difference between artillery unit and target
         this.heightDifference = this.position[2] - positionArtillery[2];
 
-        //If Artillery
-        if (artilleryMode == 0) {
-            //Chose which firemode to use for such a distance
-            if (this.calculateFiremode(this.distance) == false) {
-                return false;
-            }
+        //Chose which firemode to use for such a distance
+        if (this.calculateFiremode(this.distance) == false) {
+            return false;
+        }
 
-            //Calculate both projectile trajectory parabolas
-            this.gunElevation[0] = (Math.atan((Math.pow(this.velocity, 2) - Math.sqrt(Math.pow(this.velocity, 4) - (gravity * ((gravity * Math.pow(this.distance, 2)) + (2 * this.heightDifference * Math.pow(this.velocity, 2)))))) / (gravity * this.distance))) * 180 / Math.PI;
+        //Calculate both projectile trajectory parabolas
+        this.gunElevation[0] = (Math.atan((Math.pow(this.velocity, 2) - Math.sqrt(Math.pow(this.velocity, 4) - (gravity * ((gravity * Math.pow(this.distance, 2)) + (2 * this.heightDifference * Math.pow(this.velocity, 2)))))) / (gravity * this.distance))) * 180 / Math.PI;
 
-            this.gunElevation[1] = (Math.atan((Math.pow(this.velocity, 2) + Math.sqrt(Math.pow(this.velocity, 4) - (gravity * ((gravity * Math.pow(this.distance, 2)) + (2 * this.heightDifference * Math.pow(this.velocity, 2)))))) / (gravity * this.distance))) * 180 / Math.PI;
+        this.gunElevation[1] = (Math.atan((Math.pow(this.velocity, 2) + Math.sqrt(Math.pow(this.velocity, 4) - (gravity * ((gravity * Math.pow(this.distance, 2)) + (2 * this.heightDifference * Math.pow(this.velocity, 2)))))) / (gravity * this.distance))) * 180 / Math.PI;
 
-            //To reset the firemode tracker
-            this.velocity = 0;
+        //To reset the firemode tracker
+        this.velocity = 0;
 
+        //Activate tilt-offset on demand
+        if (experimentalMode != 0) {
             gatherHeightData(transform(this.direction[0], true), this.gunElevation[0], [artilleryPosition[0], artilleryPosition[1]], counter);
-        } else {
-            this.gunElevation[0] = maawsCalculation(this.distance, this.heightDifference);
         }
     }
 }
