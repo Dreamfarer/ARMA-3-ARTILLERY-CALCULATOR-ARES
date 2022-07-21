@@ -7,10 +7,11 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var shootingBoundaries;
 var artilleryPosition = [1, 1, 1];
-var gravity = 9.80665;
-var artilleryMode = 0; //0: Artillery, 1: MAAWS
+var gravAcceleration = 9.80665; // m/s^2
+var artilleryMode = 1; //0: Artillery, 1: MAAWS
 var experimentalMode = 0; //Activate tilt-offset (NOT working atm)
 var globalColors = ["#5DADA2", "#AD5D68", "FFFFFF", -20] //0: Primary Color, 1: Secondary Color, 2: Shaded Secondary Color (Automatically), 3: Shade amount of (1) to produce (2)
+var markerArray = []; // Array which will hold all markers
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Recolor website interface to match above defined colors
@@ -48,9 +49,6 @@ globalColors[2] = colorShade(globalColors[1], globalColors[3]);
 function projectCoordinates(point) {
     return [(Math.ceil(point[0] / 5) * 5), (Math.ceil((30720 - point[1]) / 5) * 5)];
 }
-
-
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Calculate between systems

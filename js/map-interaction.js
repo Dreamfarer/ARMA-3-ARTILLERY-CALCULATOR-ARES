@@ -35,28 +35,34 @@ map.on('contextmenu', function (e)  {
     var addButton = document.getElementById('add');
     addButton.addEventListener('click', function () {
 
-    //Request height data at that point
-    requestHeight(point, [e.latlng.lng, e.latlng.lat], "", "create", -1, 1);
+		//Request height data at that point
+		requestHeight(point, [e.latlng.lng, e.latlng.lat], "", "create", -1, 1);
 
     });
     
 });
 
-/*
-//Change Mode between MAAWS and Sochor
-var buttonChangeMode = document.getElementById('Btn3');
+
+// Choose "MAAWS Mk4 Mod 0" at the beginning
+var buttonChangeMode = document.getElementById('Btn8');
 buttonChangeMode.addEventListener('click', function () {
     
-    var display = "";
-    if (artilleryMode == 0) {
-        display = "Change to '2S9 Sochor'";
-        artilleryMode = 1;
-    } else {
-        display = "Change to 'MAAWS Mk4 Mod 0'";
-        artilleryMode = 0;
-    }
-    
-    document.getElementById('Btn3').innerHTML = display;
-
+	document.getElementById('map').style.cssText = document.getElementById('map').style.cssText + "filter: blur(0px); -webkit-filter: blur(0px);";
+	// document.getElementById('options').style.cssText = document.getElementById('options').style.cssText + "filter: blur(0px); -webkit-filter: blur(0px);";
+	document.getElementById('decidePrompt').remove();
+	
+	artilleryMode = 1;
+	
 });
-*/
+
+// Choose "Self-Propelled Artillery" at the beginning
+var buttonChangeMode = document.getElementById('Btn9');
+buttonChangeMode.addEventListener('click', function () {
+	
+	document.getElementById('map').style.cssText = document.getElementById('map').style.cssText + "filter: blur(0px); -webkit-filter: blur(0px);";
+	// document.getElementById('options').style.cssText = document.getElementById('options').style.cssText + "filter: blur(0px); -webkit-filter: blur(0px);";
+	document.getElementById('decidePrompt').remove();
+	
+	artilleryMode = 0;
+	
+});

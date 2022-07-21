@@ -34,7 +34,8 @@ var map = L.map('map', {
     minZoom: 12,
     maxZoom: 17,
     crs: L.CRS.pr,
-    maxBoundsViscosity: 1
+    maxBoundsViscosity: 1,
+    zoomControl: false
 });
 
 //Set boundaries

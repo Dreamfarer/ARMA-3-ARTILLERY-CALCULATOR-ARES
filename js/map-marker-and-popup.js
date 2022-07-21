@@ -66,20 +66,29 @@ function addMarker(point, type, elevation, direction, firemode, counter) {
 function popupContent(elevation, direction, firemode, mode) {
 
     if (mode == "target") {
-
-        var begin = "<ul style='list-style-type: none; margin: 0; padding: 0;'>";
+		
+		// Display elevation
         var messageElevation = "<li style='font-weight: bold;'> Elevation: " + (Math.ceil(elevation[0] / 0.01) * 0.01).toFixed(2) + "°</li>";
+		
+		// Display direction
         var messageDirection = "Direction: " + (Math.ceil(direction[0] / 0.01) * 0.01).toFixed(2) + "°</li>";
-        var messageFiremode = "<li style='font-weight: bold; font-style: italic'> Firemode: " + firemode + "</li>";
-        var end = "</ul>";
-        return begin + messageElevation + messageDirection + messageFiremode + end;
-
-    } else if (mode == "NaN") {
+		
+		// Display firemode (if present)
+		if (artilleryMode == 0) {
+			var messageFiremode = "<li style='font-weight: bold; font-style: italic'> Firemode: " + firemode + "</li>";
+		} else {
+			var messageFiremode = "";
+		}
+		
+		// Connect strings and display
+		return "<ul style='list-style-type: none; margin: 0; padding: 0;'>" + messageElevation + messageDirection + messageFiremode + "</ul>";
+		
+	} else if (mode == "NaN") {
         return "<div style='font-weight: bold;'> Shooting is not possible</div>";
     } else {
 
         if (artilleryMode == 0) {
-            return "2S9 Sochor";
+            return "2S9 Sochor / M4 Scorcher";
         } else {
             return "MAAWS Mk4 Mod 0";
         }

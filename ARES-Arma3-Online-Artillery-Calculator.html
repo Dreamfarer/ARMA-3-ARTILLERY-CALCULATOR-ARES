@@ -1,79 +1,62 @@
 <!DOCTYPE html>
 <html>
 
-<head>
+	<head>
 
-    <title>Arma 3 Artillery Calculator [ARES]</title>
+		<title>Arma 3 Artillery Calculator [ARES]</title>
 
-    <meta name="viewport" content="initial-scale=1,maximum-scale=1,width=device-width,user-scalable=no" />
-    <meta name="keywords" content="Arma 3, Arma, ARES, Arma 3 artillery, Online artillery calculator, Artillery calculator, Arma 3 online artillery calculator, KOTH, King of the Hill" />
-    <meta name="description" content="ARES - The innovative Arma 3 Online Artillery Calculator" />
-    <meta ame="author" content="BE3dART - Gianluca I." />
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta name="viewport" content="initial-scale=1,maximum-scale=1,width=device-width,user-scalable=no" />
+		<meta name="keywords" content="Arma 3, Arma, ARES, Arma 3 artillery, Online artillery calculator, Artillery calculator, Arma 3 online artillery calculator, KOTH, King of the Hill" />
+		<meta name="description" content="ARES - The innovative Arma 3 Online Artillery Calculator" />
+		<meta ame="author" content="BE3dART - Gianluca I." />
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css">
-    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ==" crossorigin="" />
+		<script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js" integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ==" crossorigin=""></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-    <link rel="stylesheet" href="css/styles.css">
+		<link rel="stylesheet" href="css/styles.css">
 
-</head>
+	</head>
 
-<body>
+	<body>
 
-    <div style="position: relative;">
-        <div id="map-wrapper">
-            <div id="map"></div>
+		<div style="position: relative;">
+			<div id="map-wrapper">
+				<div id="map" style="filter: blur(8px); -webkit-filter: blur(8px);"></div>
 
+				<div id="decidePrompt" style="position: absolute; right: 0%; left: 0%; z-index: 3000; width: 100%; height: 100%; margin: 0; background: rgba(0,0,0,0); color: white;">
+					
+					<div style="position: absolute; z-index: 5000; width: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+					
+					<button class="buttons" id="Btn8">MAAWS Mk4 Mod 0</button>
+					<button class="buttons" id="Btn9">2S9 Sochor or M4 Scorcher</button>
 
-            <!--<div style="position: absolute; right: 0%; top: 20%; z-index: 1999; width: 10%; height: 30%; margin: 2vh; background-color: #e50027; color: white; border-radius: 0.4vh;">
+					</div>
+	
+				</div>
+				
+				<!--
+				<div id="options" style="position: absolute; right: 0%; z-index: 2000; width: 10%; bottom: 0; margin: 2vh; filter: blur(8px); -webkit-filter: blur(8px);">
+					
+					<button class="buttons" id="Btn3"><i class="fa fa-code"></i> 2S9 Sochor</button>
+					<button class="buttons" id="Btn5"><i class="fa fa-code"></i> About</button>
+					<button class="buttons" id="Btn4" onclick="window.open('https://github.com/BE3dARt/ARMA-3-ARTILLERY-CALCULATOR-ARES/issues', '_blank');"><i class="fa fa-cubes"></i> Report Bug</button>
+					<button class="buttons" id="Btn4"><i class="fa fa-paypal"></i> Donate</button>
 
-                <div class="row">
-                    <div class="column">Number of Markers:</div>
-                    <div class="column" id="numMarker">0</div>
-                </div>
+				</div>
+				-->
+			</div>
+		</div>
 
-                <div class="row">
-                    <div class="column">Height Difference:</div>
-                    <div class="column" id="heightDifference">0m</div>
-                </div>
+		<script type="text/javascript" src="js/map-initialization.js"></script>
+		<script type="text/javascript" src="js/classes.js"></script>
+		<script type="text/javascript" src="js/projectile-motion.js"></script>
+		<script type="text/javascript" src="js/map-marker-and-popup.js"></script>
+		<script type="text/javascript" src="js/map-height-request.js"></script>
+		<script type="text/javascript" src="js/global.js"></script>
+		<script type="text/javascript" src="js/map-interaction.js"></script>
 
-                <div class="row">
-                    <div class="column">Distance:</div>
-                    <div class="column" id="distance">0m</div>
-                </div>
-
-                <div class="row">
-                    <div class="column">Estimated Time (@40km/h):</div>
-                    <div class="column" id="time">0min</div>W 
-                </div>
-
-            </div>
-            -->
-
-            <div style="position: absolute; right: 0%; z-index: 2000; width: 10%; bottom: 0; margin: 2vh">
-
-                <button class="buttons" id="Btn5"><i class="fa fa-code"></i> About</button>
-                <button class="buttons" id="Btn4" onclick="window.open('https://github.com/BE3dARt/ARMA-3-ARTILLERY-CALCULATOR-ARES/issues', '_blank');"><i class="fa fa-cubes"></i> Report Bug</button>
-                <button class="buttons" id="Btn4"><i class="fa fa-paypal"></i> Donate</button>
-
-            </div>
-
-
-
-        </div>
-
-
-
-    </div>
-
-    <script type="text/javascript" src="js/map-initialization.js"></script>
-    <script type="text/javascript" src="js/classes.js"></script>
-    <script type="text/javascript" src="js/map-marker-and-popup.js"></script>
-    <script type="text/javascript" src="js/map-height-request.js"></script>
-    <script type="text/javascript" src="js/global.js"></script>
-    <script type="text/javascript" src="js/map-interaction.js"></script>
-
-</body>
+	</body>
 
 </html>

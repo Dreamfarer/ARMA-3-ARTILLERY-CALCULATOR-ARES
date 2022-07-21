@@ -56,13 +56,15 @@ function heightdataCallback(game, mapp, message, mode, markerCounter, start) {
             markerArray[markerCounter][0].setPopupContent(popupContent(-1, -1, -1, "artillery")).openPopup();
 
             //Draw boundary circle
-            map.removeLayer(shootingBoundaries);
-            shootingBoundaries = L.circle([mapp[1], mapp[0]], {
-                radius: 826,
-                color: globalColors[2],
-                opacity: .5
-            }).addTo(map);
-
+			if (artilleryMode == 0) {
+				map.removeLayer(shootingBoundaries);
+				shootingBoundaries = L.circle([mapp[1], mapp[0]], {
+					radius: 826,
+					color: globalColors[2],
+					opacity: .5
+				}).addTo(map);
+			}
+            
             if (markerArray[1] != null) {
                 requestHeight([markerArray[1][2].position[0], markerArray[1][2].position[1]], mapp, "", "update", -9, 1);
             }
@@ -122,12 +124,14 @@ function heightdataCallback(game, mapp, message, mode, markerCounter, start) {
                     addMarker(mapp, type, [0, 0], 0, "None", counter);
 
                     //Adding circle to show minimal shooting distance
-                    shootingBoundaries = L.circle([mapp[1], mapp[0]], {
-                        radius: 826,
-                        color: globalColors[2],
-                        opacity: .5
-                    }).addTo(map);
-
+					if (artilleryMode == 0) {
+						shootingBoundaries = L.circle([mapp[1], mapp[0]], {
+							radius: 826,
+							color: globalColors[2],
+							opacity: .5
+						}).addTo(map);
+					}
+                    
                 } else {
 
                     //Define marker type
