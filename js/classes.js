@@ -60,6 +60,11 @@ class Marking {
 		if (artilleryMode == 0) { // self-propelled artillery
 		
 			buffer = selfPropelledArtilleryCalculation(this.distance, this.heightDifference);
+			
+			if (buffer == null) {
+				return false;
+			}
+			
 			this.firemode = buffer[0];
 			this.gunElevation[0] = buffer[1][0];
 			this.gunElevation[1] = buffer[1][1];
@@ -77,5 +82,7 @@ class Marking {
         if (experimentalMode != 0) {
             gatherHeightData(transform(this.direction[0], true), this.gunElevation[0], [artilleryPosition[0], artilleryPosition[1]], counter);
         }
+		
+		return true;
     }
 }

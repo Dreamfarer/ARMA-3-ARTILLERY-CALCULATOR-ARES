@@ -1,8 +1,8 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Send PHP request to retrieve height data
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-function requestHeight(game, mapp, message, mode, markerCounter, start) {
-
+function requestHeight(vec2D_Arma, vec2D_Leaflet, mode, indexOfSelectedMarker, iterationCounterOfUpdate) {
+	
     //Create new HTTP Request
     var createCORSRequest = function (method, url) {
         var xhr = new XMLHttpRequest();
@@ -16,7 +16,7 @@ function requestHeight(game, mapp, message, mode, markerCounter, start) {
     };
 
     //Variables to pass to server
-    var url = 'https://api.be3dart.ch/ARES.php?x=' + game[0] + '&y=' + game[1];
+    var url = 'https://api.be3dart.ch/ARES.php?x=' + vec2D_Arma[0] + '&y=' + vec2D_Arma[1];
     var method = 'GET';
     var xhr = createCORSRequest(method, url);
 
@@ -24,8 +24,8 @@ function requestHeight(game, mapp, message, mode, markerCounter, start) {
         if (xhr.readyState == 4) {
 
             //Message to flaot
-            message = parseFloat(xhr.responseText)
-            heightdataCallback(game, mapp, message, mode, markerCounter, start);
+            var message = parseFloat(xhr.responseText)
+            heightdataCallback(vec2D_Arma, vec2D_Leaflet, message, mode, indexOfSelectedMarker, iterationCounterOfUpdate);
 
         }
     }
@@ -40,117 +40,122 @@ function requestHeight(game, mapp, message, mode, markerCounter, start) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //Height Data Callback
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-function heightdataCallback(game, mapp, message, mode, markerCounter, start) {
+function heightdataCallback(vec2D_Arma, vec2D_Leaflet, message, mode, indexOfSelectedMarker, iterationCounterOfUpdate) {
 
-    if (mode == "update") {
+	// Update existing marker
+    if (mode.substring(0, 6) == "update") {
+		
+		// Update artillery system
+        if (indexOfSelectedMarker == 0) {
 
-        var goal = markerArray.length;
-
-        //Go this path to update artillery when dragged
-        if (markerCounter == 0) {
-
-            //Set poition for artillery unit
-            artilleryPosition = [game[0], game[1], (message + 1.7)];
+            //Set position for artillery unit
+            artilleryPosition = [vec2D_Arma[0], vec2D_Arma[1], (message + 1.7)];
 
             //Populate popup content with the new data
-            markerArray[markerCounter][0].setPopupContent(popupContent(-1, -1, -1, "artillery")).openPopup();
+            markerArray[indexOfSelectedMarker][0].setPopupContent(popupContent(-1, -1, -1, "artillery")).openPopup();
 
             //Draw boundary circle
 			if (artilleryMode == 0) {
 				map.removeLayer(shootingBoundaries);
-				shootingBoundaries = L.circle([mapp[1], mapp[0]], {
+				shootingBoundaries = L.circle([vec2D_Leaflet[1], vec2D_Leaflet[0]], {
 					radius: 826,
 					color: globalColors[2],
-					opacity: .5
+					opacity: 0.5
 				}).addTo(map);
 			}
-            
+			
+			// Start the recursion loop if there is at least one target which needs to be updated
             if (markerArray[1] != null) {
-                requestHeight([markerArray[1][2].position[0], markerArray[1][2].position[1]], mapp, "", "update", -9, 1);
+                requestHeight([markerArray[1][2].position[0], markerArray[1][2].position[1]], vec2D_Leaflet, "update-all", null, 1); // Start iteration at 1 'cause index 0 is the artillery system itself
             }
+			
+        } 
+		
+		// Update everything BUT the artillery system
+		if (indexOfSelectedMarker != 0) {
+			
+			// Single marker
+            if (mode != "update-all") {
+				
+				//Update its positions
+				markerArray[indexOfSelectedMarker][2].position = [vec2D_Arma[0], vec2D_Arma[1], (message + 1.7)];
+				
+				//Calculate other variables
+				markerArray[indexOfSelectedMarker][2].calculateTrajectoryProjectileMotion(artilleryPosition, indexOfSelectedMarker);
+				
+				//Update popup content
+				markerArray[indexOfSelectedMarker][0].setPopupContent(popupContent(markerArray[indexOfSelectedMarker][2].gunElevation, markerArray[indexOfSelectedMarker][2].direction, markerArray[indexOfSelectedMarker][2].firemode, "target")).openPopup();
 
-            return;
-
-            //Go this path to update target when independetly dragged
-        } else {
-
-            if (markerCounter != -9) {
-
-                start = markerCounter;
-                goal = markerCounter;
             }
+			
+			// Every marker
+			if (mode == "update-all" && iterationCounterOfUpdate <= markerArray.length) {
 
+				//Calculate other variables
+				markerArray[iterationCounterOfUpdate][2].calculateTrajectoryProjectileMotion(artilleryPosition, iterationCounterOfUpdate);
+
+				//Update popup content
+				markerArray[iterationCounterOfUpdate][0].setPopupContent(popupContent(markerArray[iterationCounterOfUpdate][2].gunElevation, markerArray[iterationCounterOfUpdate][2].direction, markerArray[iterationCounterOfUpdate][2].firemode, "target")).openPopup();
+
+				//Enter recursion loop if artillery unit has been dragged and all target need updates
+				if (markerArray[iterationCounterOfUpdate + 1] != null && mode == "update-all") {
+					requestHeight([markerArray[iterationCounterOfUpdate + 1][2].position[0], markerArray[iterationCounterOfUpdate + 1][2].position[1]], vec2D_Leaflet, "update-all", null, iterationCounterOfUpdate + 1);
+				}
+			}
         }
+    } 
+	
+	//Create nonexisting marker
+	if (mode == "create") {
 
-        if (markerArray[start] != null && start <= goal) {
+		// Index of next empty marker
+		var markerCount = 0;
+		while (markerArray[markerCount] != null) {markerCount += 1};
 
-            //Update it's positions
-            if (markerCounter != -9) {
-                markerArray[start][2].position = [game[0], game[1], (message + 1.7)];
-            }
+		//If no artillery is present
+		if (markerArray[0] == null) {
 
-            //Calculate other variables
-            markerArray[start][2].calculateTrajectoryProjectileMotion(artilleryPosition, start);
+			//Define marker type
+			var type = "artillery";
 
-            //Update popup content
-            markerArray[start][0].setPopupContent(popupContent(markerArray[start][2].gunElevation, markerArray[start][2].direction, markerArray[start][2].firemode, "target")).openPopup();
+			//Initialize new array parameters and create new marker
+			markerArray[0] = [0, type, new Marking([vec2D_Arma[0], vec2D_Arma[1], message])];
 
-            //Enter recursion loop if artillery unit has been dragged and all target need updates
-            if (markerArray[start + 1] != null && markerCounter == -9) {
-                requestHeight([markerArray[start + 1][2].position[0], markerArray[start + 1][2].position[1]], mapp, "", "update", -9, start + 1);
+			//Set poition for artillery unit
+			artilleryPosition = [vec2D_Arma[0], vec2D_Arma[1], (message + 1.7)];
 
-            }
-        }
+			//Add the marker for the artillery unit
+			addMarker(vec2D_Leaflet, type, [0, 0], 0, "None", 0);
 
-    } else {
+			//Adding circle to show minimal shooting distance
+			if (artilleryMode == 0) {
+				shootingBoundaries = L.circle([vec2D_Leaflet[1], vec2D_Leaflet[0]], {
+					radius: 826,
+					color: globalColors[2],
+					opacity: 0.5
+				}).addTo(map);
+			}
+			
+			// Update every marker
+			requestHeight(vec2D_Arma, vec2D_Leaflet, "update", 0, null);
+			
+		} else {
 
-        //Count the marker from start to end; finish when a null-entry is found
-        var counter = 0;
-        while (true) {
-            if (markerArray[counter] == null) {
+			//Define marker type
+			var type = "target";
 
-                if (markerArray[0] == null) {
+			//Initialize new array parameters and create new marker
+			markerArray[markerCount] = [0, type, new Marking([vec2D_Arma[0], vec2D_Arma[1], message])];
 
-                    //Define marker type
-                    var type = "artillery";
+			//Calculate all associate data and handle error if shooting is not possible
+			if (markerArray[markerCount][2].calculateTrajectoryProjectileMotion(artilleryPosition, markerCount) == false) {
+				markerArray.splice(markerCount, 1);
+				return;
+			}
 
-                    //Initialize new array parameters and create new marker
-                    markerArray[counter] = [0, type, new Marking([game[0], game[1], message])];
+			//Add the marker for the target
+			addMarker(vec2D_Leaflet, type, markerArray[markerCount][2].gunElevation, markerArray[markerCount][2].direction, markerArray[markerCount][2].firemode, markerCount);
 
-                    //Set poition for artillery unit
-                    artilleryPosition = [game[0], game[1], (message + 1.7)];
-
-                    //Add the marker for the artillery unit
-                    addMarker(mapp, type, [0, 0], 0, "None", counter);
-
-                    //Adding circle to show minimal shooting distance
-					if (artilleryMode == 0) {
-						shootingBoundaries = L.circle([mapp[1], mapp[0]], {
-							radius: 826,
-							color: globalColors[2],
-							opacity: .5
-						}).addTo(map);
-					}
-                    
-                } else {
-
-                    //Define marker type
-                    var type = "target";
-
-                    //Initialize new array parameters and create new marker
-                    markerArray[counter] = [0, type, new Marking([game[0], game[1], message])];
-
-                    //Calculate all associate data
-                    markerArray[counter][2].calculateTrajectoryProjectileMotion(artilleryPosition, counter);
-
-                    //Add the marker for the target
-                    addMarker(mapp, type, markerArray[counter][2].gunElevation, markerArray[counter][2].direction, markerArray[counter][2].firemode, counter);
-
-                }
-                break;
-            } else {
-                counter += 1;
-            }
-        }
+		}
     }
 }

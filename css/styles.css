@@ -87,3 +87,17 @@ html {
     opacity: 1;
     right: 0;
 }
+
+@keyframes blur {
+  from {filter: blur(8px); -webkit-filter: blur(8px);}
+  to {filter: blur(0px); -webkit-filter: blur(0px);}
+}
+
+@keyframes transparent {
+  from {opacity: 1;}
+  to {opacity: 0;}
+}
+
+
+
+

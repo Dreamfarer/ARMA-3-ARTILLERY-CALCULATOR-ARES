@@ -35,19 +35,18 @@ function addMarker(point, type, elevation, direction, firemode, counter) {
     markerArray[counter][0].on('dragend', function (e) {
         var tempPos = this.getLatLng();
         var point = projectCoordinates([tempPos.lng, tempPos.lat]);
-        requestHeight(point, [tempPos.lng, tempPos.lat], "", "update", counter, 0);
+        requestHeight(point, [tempPos.lng, tempPos.lat], "update", counter, null);
     });
 
     //If marker was right-clicked
     if (type == "target") {
         markerArray[counter][0].on('contextmenu', function (e) {
             map.removeLayer(markerArray[counter][0]);
-            delete markerArray[counter];
+			markerArray.splice(counter, 1);
         });
     } else {
-
         markerArray[counter][0].on('contextmenu', function (e) {
-            map.removeLayer(shootingBoundaries);
+			if (artilleryMode == 0) {map.removeLayer(shootingBoundaries)}
             map.removeLayer(markerArray[counter][0]);
             delete markerArray[counter];
         });
@@ -56,7 +55,9 @@ function addMarker(point, type, elevation, direction, firemode, counter) {
     //Populate marker popup
     markerArray[counter][0].bindPopup(popupContent(elevation, direction, firemode, type), {
         closeOnClick: false,
-        autoClose: false
+        autoClose: false,
+		autoPan: false,
+		closeButton: false
     }).openPopup();
 }
 

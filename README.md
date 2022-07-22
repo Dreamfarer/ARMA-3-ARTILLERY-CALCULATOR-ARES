@@ -21,6 +21,3 @@ Unfortunately, the map tiles exceed the GitHub upload limit. You can get them [H
 
 ### The Magic Behind It
 This section will added as soon as the web app is polished enough. Check again later for spicy information on _projectile motion and trajectories_ **with** and without drag.
-
-### Limitations
-* Currently, only Altis is implemented.
