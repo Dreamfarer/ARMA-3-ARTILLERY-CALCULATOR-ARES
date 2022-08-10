@@ -16,7 +16,7 @@ function requestHeight(vec2D_Arma, vec2D_Leaflet, mode, indexOfSelectedMarker, i
     };
 
     //Variables to pass to server
-    var url = 'https://api.be3dart.ch/ARES.php?x=' + vec2D_Arma[0] + '&y=' + vec2D_Arma[1];
+    var url = 'https://api.perytron.ch/ARES.php?x=' + vec2D_Arma[0] + '&y=' + vec2D_Arma[1];
     var method = 'GET';
     var xhr = createCORSRequest(method, url);
 
@@ -31,7 +31,7 @@ function requestHeight(vec2D_Arma, vec2D_Leaflet, mode, indexOfSelectedMarker, i
     }
 
     xhr.onerror = function () {
-        alert("Error encountered while requesting height data! Please report to BE3dARt! <3");
+        alert("Error encountered while requesting height data! Please report to Perytron! <3");
     };
 
     xhr.send();
