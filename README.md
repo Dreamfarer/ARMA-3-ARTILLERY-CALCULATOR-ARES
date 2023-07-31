@@ -13,7 +13,7 @@ Hold the left mouse button to drag the before placed markers around.
 ARES has more to offer than what you notice at a first glance.
 
 **Altitude API**\
-I have created an [API](https://api.perytron.ch/ARES.php?x=10000&y=10000) to get the height data of a given coordinate on Altis. It's effortless to use: Transmit a 'x' and 'y' coordinate to the [API](https://api.perytron.ch/ARES.php?x=10000&y=10000), and it will return nothing else than the altitude above sea level at this specified point.\
+I have created an [API](https://api.perytron.ch/ares.php?x=10000&y=10000) to get the height data of a given coordinate on Altis. It's effortless to use: Transmit a 'x' and 'y' coordinate to the [API](https://api.perytron.ch/ares.php?x=10000&y=10000), and it will return the altitude above sea level in JSON format at this specified point.\
 Let's go for an example: If you would like to know the altitude at 10'000, 10'000 on Altis, make a call to the API like this: https://api.perytron.ch/ARES.php?x=10000&y=10000
 
 **Download Map Data**\
