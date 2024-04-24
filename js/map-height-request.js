@@ -16,7 +16,7 @@ function requestHeight(vec2D_Arma, vec2D_Leaflet, mode, indexOfSelectedMarker, i
 	};
 
 	//Variables to pass to server
-	var url = 'https://api.perytron.ch/ares.php?x=' + vec2D_Arma[0] + '&y=' + vec2D_Arma[1];
+	var url = 'https://api.openlink.bot/ares.php?x=' + vec2D_Arma[0] + '&y=' + vec2D_Arma[1];
 	var method = 'GET';
 	var xhr = createCORSRequest(method, url);
 
@@ -30,14 +30,14 @@ function requestHeight(vec2D_Arma, vec2D_Leaflet, mode, indexOfSelectedMarker, i
 				heightdataCallback(vec2D_Arma, vec2D_Leaflet, response.altitude, mode, indexOfSelectedMarker, iterationCounterOfUpdate);
 			} else {
 				// Handle error if the server responds with a non-200 status code
-				alert("Error encountered while requesting height data! Please report to Perytron! <3");
+				alert("Error encountered while requesting height data!");
 			}
 
 		}
 	}
 
 	xhr.onerror = function () {
-		alert("Error encountered while requesting height data! Please report to Perytron! <3");
+		alert("Error encountered while requesting height data!");
 	};
 
 	xhr.send();
