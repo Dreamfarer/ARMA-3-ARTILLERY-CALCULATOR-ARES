@@ -2,7 +2,7 @@
 ARES is a web service to calculate the elevation, heading, and fire mode needed to precisely hit desired targets in Bohemia Interactive's **Arma 3**. When loading the web app, you get to choose between the classic artillery computer for the **2S9 Sochor** and **M4 Scorcher**, or, you are finally able to opt for the _**redneck artillery**_ version designed for the **MAAWS Mk4 Mod 0** – _Be the real King of the Hill!_
 
 ### Get ARES
-It is as simple as cloning this repository and double-clicking the `.html` file. However, there is yet a more convenient way: Head straight to the live version of this artillery calculator found [HERE](https://openlink.bot/ares) - Free of charge and no nasty trackers nor advertisements!
+It is as simple as cloning this repository and double-clicking the `.html` file. However, there is yet a more convenient way: Head straight to the live version of this artillery calculator found [HERE](https://arma.openlink.bot/ares) - Free of charge and no nasty trackers nor advertisements!
 
 ### Controls
 When first loading up the web app, you are prompted to choose between the calculator for the 2S9 Sochor and M4 Scorcher or the redneck artillery version for the MAAWS Mk4 Mod 0.\
@@ -17,7 +17,7 @@ I have created an [API](https://api.openlink.bot/ares.php?x=10000&y=10000) to ge
 Let's go for an example: If you would like to know the altitude at 10'000, 10'000 on Altis, make a call to the API like this: https://api.openlink.bot/ares.php?x=10000&y=10000
 
 **Download Map Data**\
-Unfortunately, the map tiles exceed the GitHub upload limit. You can get them [HERE](https://openlink.bot/download/map.zip). Unzip `map.zip` and drag-and-drop the map folder into the root project folder
+Unfortunately, the map tiles exceed the GitHub upload limit. You can get them [HERE](https://arma.openlink.bot/ares/download/map.zip). Unzip `map.zip` and drag-and-drop the map folder into the root project folder
 
 ### The Magic Behind It
 The following documentation is split in two sections. The first section deals with the flight path of artillery shells shot by self-propelled artillery like the 2S9 Sochor and M4 Scorcher. Fortunately, in Arma 3, artillery shells are the only projectiles [not](https://community.bistudio.com/wiki/CfgAmmo_Config_Reference#airFriction) affected by external force such as wind or air friction.\
