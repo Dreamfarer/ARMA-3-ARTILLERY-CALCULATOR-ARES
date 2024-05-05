@@ -17,7 +17,7 @@ I have created an [API](https://api.openlink.bot/ares.php?x=10000&y=10000) to ge
 Let's go for an example: If you would like to know the altitude at 10'000, 10'000 on Altis, make a call to the API like this: https://api.openlink.bot/ares.php?x=10000&y=10000
 
 **Download Map Data**\
-Unfortunately, the map tiles exceed the GitHub upload limit. You can get them [HERE](https://arma.openlink.bot/ares/download/map.zip). Unzip `map.zip` and drag-and-drop the map folder into the root project folder
+Unfortunately, the map tiles exceed the GitHub upload limit. You can get them [HERE](https://arma.openlink.bot/assets/map.zip). Unzip `map.zip` and drag-and-drop the map folder into the root project folder
 
 ### The Magic Behind It
 The following documentation is split in two sections. The first section deals with the flight path of artillery shells shot by self-propelled artillery like the 2S9 Sochor and M4 Scorcher. Fortunately, in Arma 3, artillery shells are the only projectiles [not](https://community.bistudio.com/wiki/CfgAmmo_Config_Reference#airFriction) affected by external force such as wind or air friction.\
