@@ -2,12 +2,18 @@
 ARES is a web service to calculate the elevation, heading, and fire mode needed to precisely hit desired targets in Bohemia Interactive's **Arma 3**. When loading the web app, you get to choose between the classic artillery computer for the **2S9 Sochor** and **M4 Scorcher**, or, you are finally able to opt for the _**redneck artillery**_ version designed for the **MAAWS Mk4 Mod 0** – _Be the real King of the Hill!_
 
 ### Get ARES
-It is as simple as cloning this repository and double-clicking the `.html` file. However, there is yet a more convenient way: Head straight to the live version of this artillery calculator found [HERE](https://arma.openlink.bot/ares) - Free of charge and no nasty trackers nor advertisements!
+It is as simple as cloning this repository and double-clicking the `.html` file. However, there is yet a more convenient way: Head straight to the live version of this artillery calculator found [HERE](https://arma.openlink.bot/ares) – Free of charge and no nasty trackers nor advertisements!
 
-### Controls
-When first loading up the web app, you are prompted to choose between the calculator for the 2S9 Sochor and M4 Scorcher or the redneck artillery version for the MAAWS Mk4 Mod 0.\
-First off, perform a right-click to add your artillery unit to the map. By right-clicking anywhere on the map again, a target for your artillery unit is created. Artillery units and targets can be distinguished by color or text inside the respective popup. Simply right-click on a marker to delete it. _(Note: Left-click is equivalent to one press on mobile / Right-click is equivalent to long-press on mobile)_\
-Hold the left mouse button to drag the before placed markers around.
+### How to Use?
+When you open the web app, you'll be prompted to choose between two artillery calculators: one for the 2S9 Sochor and M4 Scorcher, and another for the MAAWS Mk4 Mod 0 (redneck artillery version).
+
+**Add an Artillery Unit**: Right-click on the map to place your artillery unit.\
+**Set a Target**: Right-click again anywhere on the map to place a target.\
+**Move Markers**: Hold the left mouse button and drag to reposition existing markers.\
+**Delete a Marker**: Right-click on any marker to remove it.
+
+For more guidance, check out the [tutorial](https://youtu.be/hKEvLDI5Cxo?si=XfqqDMszCjSBtvyU) video by [Testiboule](https://www.youtube.com/@Testiboule). Thanks, Testiboule! <3\
+*On mobile, a left-click is equivalent to a single tap, and a right-click is equivalent to a long press.*
 
 ### What Extra Features Does ARES Have to Offer?
 ARES has more to offer than what you notice at a first glance.
@@ -80,4 +86,4 @@ My program would then replace 5° with 5.588° and would try again. This time it
 
 As you can see, we are arriving at our unknown goal angle pretty fast. The only thing you would need to specify further is when the precision is enough to stop the recursive execution of this code and print the found angle onto the map.
 
-You can use my [Excel file](https://github.com/Perytron/ARMA-3-ARTILLERY-CALCULATOR-ARES/blob/master/auxiliary/Projectile%20Motion%20with%20Air%20Resistance.xlsx) to play around with the now newly acquired knowledge. You can safely ignore Stokes Drag.
+You can use my [Excel file](https://github.com/Dreamfarer/ARMA-3-ARTILLERY-CALCULATOR-ARES/blob/master/auxiliary/Projectile%20Motion%20with%20Air%20Resistance.xlsx) to play around with the now newly acquired knowledge. You can safely ignore Stokes Drag.
