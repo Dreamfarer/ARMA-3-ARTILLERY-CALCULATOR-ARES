@@ -45,3 +45,5 @@ next-env.d.ts
 tiles/
 elevation/
 .idea
+# maplibre-gl worker bundle, copied from node_modules by "npm run build:worker"
+public/maplibre/

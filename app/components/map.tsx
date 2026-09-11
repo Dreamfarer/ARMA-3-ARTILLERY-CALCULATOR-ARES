@@ -1,12 +1,18 @@
 'use client';
 import { useEffect, useRef } from 'react';
-import maplibregl from 'maplibre-gl';
+import { Map as MapLibreMap, setWorkerUrl } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import styles from './map.module.css';
 import { useMapContext } from '../context/map-context';
 import { remToPx, vhToPx } from '@/lib/convert';
 import { flattenRectangleLatLng } from '@/lib/geo/flatten-rectangle-lat-lng';
 import { getMapBounds } from '@/lib/geo/get-map-bounds';
+
+// Since v6 the worker has to be pointed at explicitly when bundled. Turbopack
+// does emit it, but under a content-hashed name, which breaks the relative
+// `./maplibre-gl-shared.mjs` import the worker starts with. `npm run build:worker`
+// copies both files to `public/maplibre/` instead, where they stay side by side.
+setWorkerUrl('/maplibre/maplibre-gl-worker.mjs');
 
 export default function Map() {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -21,7 +27,7 @@ export default function Map() {
     const bounds = flattenRectangleLatLng(getMapBounds(meta));
     let wasMobile = mapContainer.current.offsetWidth < 768;
 
-    const map = new maplibregl.Map({
+    const map = new MapLibreMap({
       container: mapContainer.current,
       style: {
         version: 8,

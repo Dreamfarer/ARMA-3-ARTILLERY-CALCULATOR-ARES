@@ -65,7 +65,7 @@ export function useTogglePopup(
       popup.root = root;
       popup.featureId = id;
 
-      popup.on('remove', () => {
+      popup.on('close', () => {
         popup.root?.unmount();
         delete popup.root;
         delete popup.featureId;
